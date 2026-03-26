@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DOC-001",
+    "name": "Dr. Arun Patel",
+    "specialization": "Ophthalmologist",
+    "hospital": "Sankara Nethralaya",
+    "licenseNo": "MCI-12345",
+    "email": "dr.arun@example.com",
+    "password": "password123",
+    "approved": true,
+    "createdAt": "2024-01-10T08:00:00Z",
+    "docPath": null
+  },
+  {
+    "id": "DOC-002",
+    "name": "Dr. Neha Gupta",
+    "specialization": "Retina Specialist",
+    "hospital": "Narayana Nethralaya",
+    "licenseNo": "MCI-67890",
+    "email": "dr.neha@example.com",
+    "password": "password123",
+    "approved": true,
+    "createdAt": "2024-01-12T09:15:00Z",
+    "docPath": null
+  },
+  {
+    "id": "DOC-003",
+    "name": "Dr. Vikram Singh",
+    "specialization": "Glaucoma Specialist",
+    "hospital": "LV Prasad",
+    "licenseNo": "MCI-11111",
+    "email": "dr.vikram@example.com",
+    "password": "password123",
+    "approved": false,
+    "createdAt": "2024-01-20T10:45:00Z",
+    "docPath": null
+  }
+]

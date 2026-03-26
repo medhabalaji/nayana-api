@@ -1,0 +1,29 @@
+[
+  {
+    "caseId": "CASE-001",
+    "messages": [
+      {
+        "senderName": "Rajesh Kumar",
+        "senderRole": "patient",
+        "text": "Hi Doctor, I received my results. What should I do next?",
+        "timestamp": "2024-01-18T15:45:00Z"
+      },
+      {
+        "senderName": "Dr. Arun Patel",
+        "senderRole": "doctor",
+        "text": "Hello Rajesh, based on your retinal scan, you have early signs of diabetic retinopathy. Please schedule an appointment with me this week.",
+        "timestamp": "2024-01-18T16:20:00Z"
+      },
+      {
+        "senderName": "Rajesh Kumar",
+        "senderRole": "patient",
+        "text": "I've booked an appointment for Feb 5th at 10 AM. Thank you.",
+        "timestamp": "2024-01-18T16:35:00Z"
+      }
+    ]
+  },
+  {
+    "caseId": "CASE-002",
+    "messages": []
+  }
+]

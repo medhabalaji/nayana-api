@@ -1,0 +1,20 @@
+[
+  {
+    "id": "PAT-001",
+    "name": "Rajesh Kumar",
+    "age": 45,
+    "gender": "Male",
+    "email": "rajesh@example.com",
+    "password": "password123",
+    "createdAt": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": "PAT-002",
+    "name": "Priya Sharma",
+    "age": 32,
+    "gender": "Female",
+    "email": "priya@example.com",
+    "password": "password123",
+    "createdAt": "2024-01-16T14:20:00Z"
+  }
+]

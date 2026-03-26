@@ -1,0 +1,30 @@
+[
+  {
+    "appointmentId": "APPT-001",
+    "patientEmail": "rajesh@example.com",
+    "patientName": "Rajesh Kumar",
+    "doctorEmail": "dr.arun@example.com",
+    "doctorName": "Dr. Arun Patel",
+    "date": "2024-02-05",
+    "timeSlot": "10:00 AM",
+    "caseId": "CASE-001",
+    "notes": "Follow-up for DR consultation",
+    "status": "Confirmed",
+    "meetLink": "https://meet.jit.si/nayana-appt001",
+    "createdAt": "2024-01-18T14:30:00Z"
+  },
+  {
+    "appointmentId": "APPT-002",
+    "patientEmail": "priya@example.com",
+    "patientName": "Priya Sharma",
+    "doctorEmail": "dr.neha@example.com",
+    "doctorName": "Dr. Neha Gupta",
+    "date": "2024-02-10",
+    "timeSlot": "02:00 PM",
+    "caseId": "CASE-002",
+    "notes": "Initial consultation",
+    "status": "Pending",
+    "meetLink": null,
+    "createdAt": "2024-01-20T13:15:00Z"
+  }
+]

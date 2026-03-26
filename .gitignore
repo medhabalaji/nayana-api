@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Environment Variables / Secrets
+.env
+
+# Heavy ML Models
+models/*.pth
+models/*.xml
+
+# Uploaded images
+received_images/
+
+# OS generated files
+.DS_Store

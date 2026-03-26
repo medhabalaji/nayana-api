@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nayana - AI Eye Screening</title>
+    <style>
+        /* --- STREAMLIT CLONE CSS --- */
+        :root {
+            --sl-bg: #0e1117;
+            --sl-sidebar: #262730;
+            --sl-text: #fafafa;
+            --sl-text-muted: #a3a8b8;
+            --sl-input-bg: #262730;
+            --sl-border: #4b4c53;
+            --sl-primary: #ff4b4b; 
+        }
+
+        /* Light Mode Theme Variables */
+        body.light-mode {
+            --sl-bg: #ffffff;
+            --sl-sidebar: #f0f2f6;
+            --sl-text: #31333f;
+            --sl-text-muted: #555867;
+            --sl-input-bg: #ffffff;
+            --sl-border: #d3dae8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--sl-bg);
+            color: var(--sl-text);
+            display: flex;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 300px;
+            background-color: var(--sl-sidebar);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--sl-border);
+            transition: background-color 0.3s;
+        }
+
+        .sidebar h2 { margin-bottom: 0.2rem; }
+        .sidebar p { color: var(--sl-text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+        .nav-item { padding: 0.5rem 0; color: var(--sl-text-muted); cursor: pointer; transition: color 0.2s; }
+        .nav-item.active { color: var(--sl-text); font-weight: bold; }
+        .nav-item:hover { color: var(--sl-primary); }
+        .sidebar hr { border: 0; border-top: 1px solid var(--sl-border); margin: 1.5rem 0; }
+
+        /* Main layout */
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .app-container { width: 100%; max-width: 550px; margin-top: 2rem; }
+        .app-container h1 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .app-container > p { text-align: center; color: var(--sl-text-muted); margin-bottom: 2rem; }
+
+        /* Streamlit Tabs */
+        .tabs { display: flex; border-bottom: 1px solid var(--sl-border); margin-bottom: 1.5rem; }
+        .tab { 
+            padding: 0.5rem 1rem; 
+            cursor: pointer; 
+            color: var(--sl-text-muted); 
+            border-bottom: 2px solid transparent; 
+        }
+        .tab.active { color: var(--sl-primary); border-bottom-color: var(--sl-primary); }
+
+        /* Inputs and Buttons */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--sl-text); }
+        .form-row { display: flex; gap: 1rem; }
+        .form-row .form-group { flex: 1; }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select {
+            width: 100%;
+            background-color: var(--sl-input-bg);
+            border: 1px solid var(--sl-border);
+            color: var(--sl-text);
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.4rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            color: var(--sl-text);
+            padding: 0.4rem 0;
+        }
+
+        input:focus, select:focus { border-color: var(--sl-primary); }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--sl-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+
+        .btn-icon {
+            background: var(--sl-input-bg);
+            border: 1px solid var(--sl-border);
+            color: var(--sl-text);
+            padding: 0 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+
+        .result-card {
+            background-color: var(--sl-input-bg);
+            border: 1px solid var(--sl-primary);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>nayana</h2>
+        <p>AI Eye Screening</p>
+        <hr>
+        <p style="font-size: 0.75rem; letter-spacing: 1px;">NAVIGATION</p>
+        <div class="nav-item active" id="nav-auth">Account</div>
+        <div class="nav-item" id="nav-screening">Screening</div>
+        <div class="nav-item">Results</div>
+        <div class="nav-item">Health Record</div>
+        <hr>
+        <p style="font-size: 0.75rem; letter-spacing: 1px;">MY STATS</p>
+        <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+            <div>
+                <div style="font-size: 0.8rem; color: var(--sl-text-muted);">Screenings</div>
+                <div style="font-size: 1.5rem;" id="stat-screenings">0</div>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--sl-text-muted);">Reviewed</div>
+                <div style="font-size: 1.5rem;">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="app-container">
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
+                <select id="language-select" style="width: auto; padding: 0.3rem;">
+                    <option>English</option>
+                    <option>हिंदी (Hindi)</option>
+                    <option>ಕನ್ನಡ (Kannada)</option>
+                </select>
+                <button onclick="toggleTheme()" class="btn-icon" title="Toggle Light/Dark Mode">☀️</button>
+            </div>
+
+            <div id="view-auth" class="view active">
+                <h1>nayana</h1>
+                <p>Sign in or create a free account</p>
+
+                <div class="tabs">
+                    <div class="tab" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</div>
+                    <div class="tab active" id="tab-create" onclick="switchAuthTab('create')">Create Account</div>
+                </div>
+
+                <div id="tab-content-signin" class="view">
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password">
+                    </div>
+                    <button class="btn-primary" onclick="loginSuccess()">Sign In</button>
+                </div>
+
+                <div id="tab-content-create" class="view active">
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Your name</label>
+                            <input type="text" placeholder="Anagha">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Age</label>
+                            <input type="number" value="19">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select>
+                            <option>Female</option>
+                            <option>Male</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="blanagha82@gmail.com">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm password</label>
+                            <input type="password" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="loginSuccess()">Create Account</button>
+                </div>
+            </div>
+
+            <div id="view-screening-dash" class="view">
+                <h1 style="text-align: left; font-size: 2rem;">New Screening</h1>
+                <p style="text-align: left;">Upload patient data for Nayana AI analysis.</p>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label>Reported Symptoms</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="symptoms-input" placeholder="e.g., blurry vision, redness...">
+                        <button onclick="startVoice()" class="btn-icon" title="Use Voice Input">🎤</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Duration of Symptoms</label>
+                    <div style="display: flex; gap: 15px; margin-top: 5px; color: var(--sl-text);">
+                        <label><input type="radio" name="duration" style="width: auto;"> <span>< 1 week</span></label>
+                        <label><input type="radio" name="duration" style="width: auto;"> <span>1-4 weeks</span></label>
+                        <label><input type="radio" name="duration" style="width: auto;"> <span>> 1 month</span></label>
+                    </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <label>Front Eye Capture</label>
+                        <input type="file" accept="image/*" capture="user"> 
+                    </div>
+                    <div class="form-group">
+                        <label>Retinal Capture (Fundus)</label>
+                        <input type="file" accept="image/*" capture="environment">
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="analyze-btn" onclick="generateResults()">Analyze Scans with Nayana AI</button>
+
+                <div id="results-area" class="result-card">
+                    <h3 style="margin-bottom: 10px; color: var(--sl-primary);">Analysis Complete</h3>
+                    <p><strong>Front Eye:</strong> <span style="color: #22c55e;">Clear (No Cataract Detected)</span></p>
+                    <p><strong>Retinal Scan:</strong> <span style="color: #ff4b4b;">Flagged for Review (Possible Diabetic Retinopathy)</span></p>
+                    <p style="font-size: 0.85rem; color: var(--sl-text-muted); margin-top: 15px;">*Results generated via local ML models (eye_model_v2_best.pth). Awaiting doctor verification.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. Light/Dark Mode Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        // 2. Switch between Sign In and Create Account tabs
+        function switchAuthTab(tabName) {
+            document.getElementById('tab-signin').classList.remove('active');
+            document.getElementById('tab-create').classList.remove('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            document.getElementById('tab-content-signin').classList.remove('active');
+            document.getElementById('tab-content-create').classList.remove('active');
+            document.getElementById('tab-content-' + tabName).classList.add('active');
+        }
+
+        // 3. Handle successful login/creation -> Move to Screening Dashboard
+        function loginSuccess() {
+            document.getElementById('view-auth').classList.remove('active');
+            document.getElementById('view-screening-dash').classList.add('active');
+            
+            // Update Sidebar Highlights
+            document.getElementById('nav-auth').classList.remove('active');
+            document.getElementById('nav-screening').classList.add('active');
+        }
+
+        // 4. Voice Input (Web Speech API)
+        function startVoice() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.start();
+                const input = document.getElementById('symptoms-input');
+                input.placeholder = "Listening...";
+                
+                recognition.onresult = function(event) {
+                    input.value = event.results[0][0].transcript;
+                    input.placeholder = "e.g., blurry vision, redness...";
+                };
+                recognition.onerror = function() {
+                    input.placeholder = "e.g., blurry vision, redness...";
+                    alert("Voice recognition failed. Please try again or type.");
+                }
+            } else {
+                alert("Voice recognition is not supported in this browser. Please type the symptoms.");
+            }
+        }
+
+        // 5. Result Generation Simulation
+        function generateResults() {
+            const btn = document.getElementById('analyze-btn');
+            btn.textContent = "Processing images...";
+            btn.style.opacity = "0.7";
+            
+            // Simulating API delay before showing results
+            setTimeout(() => {
+                document.getElementById('results-area').style.display = "block";
+                btn.textContent = "Analyze Scans with Nayana AI";
+                btn.style.opacity = "1";
+                
+                // Update stats in sidebar
+                document.getElementById('stat-screenings').textContent = "1";
+            }, 2000); // 2 second fake loading time
+        }
+    </script>
+</body>
+</html>
