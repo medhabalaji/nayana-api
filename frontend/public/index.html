@@ -1,356 +1,1286 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nayana - AI Eye Screening</title>
-    <style>
-        /* --- STREAMLIT CLONE CSS --- */
-        :root {
-            --sl-bg: #0e1117;
-            --sl-sidebar: #262730;
-            --sl-text: #fafafa;
-            --sl-text-muted: #a3a8b8;
-            --sl-input-bg: #262730;
-            --sl-border: #4b4c53;
-            --sl-primary: #ff4b4b; 
-        }
-
-        /* Light Mode Theme Variables */
-        body.light-mode {
-            --sl-bg: #ffffff;
-            --sl-sidebar: #f0f2f6;
-            --sl-text: #31333f;
-            --sl-text-muted: #555867;
-            --sl-input-bg: #ffffff;
-            --sl-border: #d3dae8;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-
-        body {
-            background-color: var(--sl-bg);
-            color: var(--sl-text);
-            display: flex;
-            min-height: 100vh;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Sidebar styling */
-        .sidebar {
-            width: 300px;
-            background-color: var(--sl-sidebar);
-            padding: 2rem 1.5rem;
-            border-right: 1px solid var(--sl-border);
-            transition: background-color 0.3s;
-        }
-
-        .sidebar h2 { margin-bottom: 0.2rem; }
-        .sidebar p { color: var(--sl-text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
-        .nav-item { padding: 0.5rem 0; color: var(--sl-text-muted); cursor: pointer; transition: color 0.2s; }
-        .nav-item.active { color: var(--sl-text); font-weight: bold; }
-        .nav-item:hover { color: var(--sl-primary); }
-        .sidebar hr { border: 0; border-top: 1px solid var(--sl-border); margin: 1.5rem 0; }
-
-        /* Main layout */
-        .main-content {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .app-container { width: 100%; max-width: 550px; margin-top: 2rem; }
-        .app-container h1 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .app-container > p { text-align: center; color: var(--sl-text-muted); margin-bottom: 2rem; }
-
-        /* Streamlit Tabs */
-        .tabs { display: flex; border-bottom: 1px solid var(--sl-border); margin-bottom: 1.5rem; }
-        .tab { 
-            padding: 0.5rem 1rem; 
-            cursor: pointer; 
-            color: var(--sl-text-muted); 
-            border-bottom: 2px solid transparent; 
-        }
-        .tab.active { color: var(--sl-primary); border-bottom-color: var(--sl-primary); }
-
-        /* Inputs and Buttons */
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--sl-text); }
-        .form-row { display: flex; gap: 1rem; }
-        .form-row .form-group { flex: 1; }
-
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select {
-            width: 100%;
-            background-color: var(--sl-input-bg);
-            border: 1px solid var(--sl-border);
-            color: var(--sl-text);
-            padding: 0.6rem 0.8rem;
-            border-radius: 0.4rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        input[type="file"] {
-            width: 100%;
-            color: var(--sl-text);
-            padding: 0.4rem 0;
-        }
-
-        input:focus, select:focus { border-color: var(--sl-primary); }
-
-        .btn-primary {
-            width: 100%;
-            background-color: var(--sl-primary);
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 0.4rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 1rem;
-            transition: opacity 0.2s;
-        }
-        .btn-primary:hover { opacity: 0.9; }
-
-        .btn-icon {
-            background: var(--sl-input-bg);
-            border: 1px solid var(--sl-border);
-            color: var(--sl-text);
-            padding: 0 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .view { display: none; animation: fadeIn 0.3s ease; }
-        .view.active { display: block; }
-
-        .result-card {
-            background-color: var(--sl-input-bg);
-            border: 1px solid var(--sl-primary);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-top: 1.5rem;
-            display: none;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Nayana — AI Eye Screening</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ═══════════════════════════ TOKENS ═══════════════════════════ */
+:root{
+  --bg:#0e1117;--sidebar:#262730;--card:#1a1d27;
+  --border:#3d3f4a;--text:#fafafa;--muted:#8b8fa8;
+  --primary:#ff4b4b;--primary-dim:rgba(255,75,75,.15);
+  --green:#2d9e6b;--yellow:#f59e0b;--blue:#3b82f6;
+  --input-bg:#1e2130;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4);
+}
+[data-theme="light"]{
+  --bg:#f0f2f6;--sidebar:#ffffff;--card:#ffffff;
+  --border:#d3dae8;--text:#31333f;--muted:#6b7280;
+  --input-bg:#ffffff;--shadow:0 4px 24px rgba(0,0,0,.08);
+}
+/* ═══════════════════════════ RESET ════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:background .3s,color .3s}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+a{color:var(--primary);text-decoration:none}
+/* ═══════════════════════════ LAYOUT ═══════════════════════════ */
+#sidebar{width:260px;min-width:260px;background:var(--sidebar);border-right:1px solid var(--border);padding:24px 20px;display:flex;flex-direction:column;gap:0;transition:background .3s}
+#main{flex:1;overflow-y:auto;padding:28px 32px}
+/* ═══════════════════════════ SIDEBAR ══════════════════════════ */
+.brand{font-size:26px;font-weight:900;color:var(--yellow);letter-spacing:-1px;margin-bottom:2px}
+.brand-sub{font-size:11px;color:var(--muted);margin-bottom:24px}
+.nav-section{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:16px 0 8px}
+.nav-item{padding:8px 12px;border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;transition:all .2s;margin-bottom:2px}
+.nav-item:hover{background:var(--primary-dim);color:var(--primary)}
+.nav-item.active{background:var(--primary-dim);color:var(--primary);font-weight:600}
+.stat-row{display:flex;gap:16px;margin-top:8px}
+.stat-box{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:var(--text)}
+.sidebar-footer{margin-top:auto;padding-top:20px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
+/* ═══════════════════════════ TOOLBAR ══════════════════════════ */
+#toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px}
+select.lang-sel,button.theme-btn{background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:13px}
+/* ═══════════════════════════ VIEWS ════════════════════════════ */
+.view{display:none;animation:fadeIn .3s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* ═══════════════════════════ CARDS ════════════════════════════ */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.card-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+/* ═══════════════════════════ FORMS ════════════════════════════ */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+input[type=text],input[type=email],input[type=password],input[type=number],select,textarea{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);color:var(--text);
+  padding:9px 12px;border-radius:8px;outline:none;font-size:14px;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+textarea{resize:vertical;min-height:80px}
+input[type=file]{width:100%;color:var(--text);padding:6px 0;font-size:13px}
+/* ═══════════════════════════ BUTTONS ══════════════════════════ */
+.btn{padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;border:none;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff;width:100%;padding:11px}
+.btn-primary:hover{opacity:.88}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-green{background:var(--green);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-icon{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:16px}
+/* ═══════════════════════════ TABS ═════════════════════════════ */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;gap:4px}
+.tab{padding:8px 18px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+/* ═══════════════════════════ ALERTS ═══════════════════════════ */
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.alert-err{background:rgba(255,75,75,.12);border:1px solid rgba(255,75,75,.3);color:#fca5a5}
+.alert-ok{background:rgba(45,158,107,.12);border:1px solid rgba(45,158,107,.3);color:#6ee7b7}
+.alert-warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fcd34d}
+/* ═══════════════════════════ BADGE ════════════════════════════ */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-pending{background:rgba(245,158,11,.15);color:#fcd34d}
+.badge-approved{background:rgba(45,158,107,.15);color:#6ee7b7}
+.badge-rejected{background:rgba(255,75,75,.15);color:#fca5a5}
+.badge-reviewed{background:rgba(59,130,246,.15);color:#93c5fd}
+/* ═══════════════════════════ TABLE ════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+/* ═══════════════════════════ PROGRESS ═════════════════════════ */
+.progress-wrap{background:var(--border);border-radius:20px;height:8px;overflow:hidden;margin:6px 0 14px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#ff8c8c);border-radius:20px;transition:width .4s ease}
+/* ═══════════════════════════ STEP BAR ═════════════════════════ */
+.step-bar{display:flex;align-items:center;margin-bottom:28px}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid var(--border);color:var(--muted);flex-shrink:0}
+.step-dot.active{border-color:var(--primary);color:var(--primary);background:var(--primary-dim)}
+.step-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.step-label{font-size:12px;margin-left:6px;color:var(--muted)}
+.step-label.active{color:var(--text);font-weight:600}
+.step-label.done{color:var(--muted)}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 8px}
+.step-line.done{background:var(--green)}
+/* ═══════════════════════════ CAMERA BOX ═══════════════════════ */
+.capture-box{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;position:relative;transition:border-color .2s}
+.capture-box:hover{border-color:var(--primary)}
+.capture-box video{width:100%;border-radius:8px;display:none}
+.capture-box img.preview{width:100%;border-radius:8px;max-height:200px;object-fit:cover}
+.capture-box .cap-label{font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.cap-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+/* ═══════════════════════════ RESULT CARD ══════════════════════ */
+.result-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.result-icon{font-size:32px}
+.result-condition{font-size:20px;font-weight:800}
+.result-risk-high{color:var(--primary)}
+.result-risk-moderate{color:var(--yellow)}
+.result-risk-low{color:var(--green)}
+.conf-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.conf-label{font-size:13px;width:180px;flex-shrink:0}
+.conf-bar-wrap{flex:1;background:var(--border);border-radius:20px;height:6px}
+.conf-bar-fill{height:100%;border-radius:20px;background:var(--primary);transition:width .6s ease}
+.conf-pct{font-size:12px;color:var(--muted);width:36px;text-align:right}
+/* ═══════════════════════════ HOSPITAL CARD ════════════════════ */
+.hosp-card{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:8px}
+.hosp-name{font-weight:600;font-size:14px}
+.hosp-dist{font-size:12px;color:var(--muted);margin-top:2px}
+/* ═══════════════════════════ CONSENT ══════════════════════════ */
+#consent-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.consent-box{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:480px;width:100%;padding:32px;box-shadow:var(--shadow)}
+/* ═══════════════════════════ AUTH ═════════════════════════════ */
+#view-auth{max-width:480px;margin:0 auto}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .logo{font-size:36px;font-weight:900;color:var(--yellow);letter-spacing:-2px}
+.auth-logo p{font-size:13px;color:var(--muted);margin-top:4px}
+.role-tabs{display:flex;gap:8px;margin-bottom:16px}
+.role-tab{flex:1;text-align:center;padding:8px;border-radius:8px;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s}
+.role-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+/* ═══════════════════════════ MISC ═════════════════════════════ */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.page-title{font-size:24px;font-weight:800;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .icon{font-size:40px;margin-bottom:12px}
+#toast{position:fixed;bottom:24px;right:24px;background:#1e2130;border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;box-shadow:var(--shadow);z-index:9999;transition:opacity .3s;opacity:0;pointer-events:none}
+#toast.show{opacity:1}
+</style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>nayana</h2>
-        <p>AI Eye Screening</p>
-        <hr>
-        <p style="font-size: 0.75rem; letter-spacing: 1px;">NAVIGATION</p>
-        <div class="nav-item active" id="nav-auth">Account</div>
-        <div class="nav-item" id="nav-screening">Screening</div>
-        <div class="nav-item">Results</div>
-        <div class="nav-item">Health Record</div>
-        <hr>
-        <p style="font-size: 0.75rem; letter-spacing: 1px;">MY STATS</p>
-        <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
-            <div>
-                <div style="font-size: 0.8rem; color: var(--sl-text-muted);">Screenings</div>
-                <div style="font-size: 1.5rem;" id="stat-screenings">0</div>
-            </div>
-            <div>
-                <div style="font-size: 0.8rem; color: var(--sl-text-muted);">Reviewed</div>
-                <div style="font-size: 1.5rem;">0</div>
-            </div>
-        </div>
+<!-- ══════════════ CONSENT ══════════════ -->
+<div id="consent-overlay">
+  <div class="consent-box">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:30px;font-weight:900;color:var(--yellow)">nayana</div>
+      <div style="font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px">Terms of Use &amp; Patient Consent</div>
     </div>
-
-    <div class="main-content">
-        <div class="app-container">
-            
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
-                <select id="language-select" style="width: auto; padding: 0.3rem;">
-                    <option>English</option>
-                    <option>हिंदी (Hindi)</option>
-                    <option>ಕನ್ನಡ (Kannada)</option>
-                </select>
-                <button onclick="toggleTheme()" class="btn-icon" title="Toggle Light/Dark Mode">☀️</button>
-            </div>
-
-            <div id="view-auth" class="view active">
-                <h1>nayana</h1>
-                <p>Sign in or create a free account</p>
-
-                <div class="tabs">
-                    <div class="tab" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</div>
-                    <div class="tab active" id="tab-create" onclick="switchAuthTab('create')">Create Account</div>
-                </div>
-
-                <div id="tab-content-signin" class="view">
-                    <div class="form-group">
-                        <label>Email address</label>
-                        <input type="email">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password">
-                    </div>
-                    <button class="btn-primary" onclick="loginSuccess()">Sign In</button>
-                </div>
-
-                <div id="tab-content-create" class="view active">
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 2;">
-                            <label>Your name</label>
-                            <input type="text" placeholder="Anagha">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Age</label>
-                            <input type="number" value="19">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Gender</label>
-                        <select>
-                            <option>Female</option>
-                            <option>Male</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" placeholder="blanagha82@gmail.com">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" placeholder="••••••••">
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm password</label>
-                            <input type="password" placeholder="••••••••">
-                        </div>
-                    </div>
-
-                    <button class="btn-primary" onclick="loginSuccess()">Create Account</button>
-                </div>
-            </div>
-
-            <div id="view-screening-dash" class="view">
-                <h1 style="text-align: left; font-size: 2rem;">New Screening</h1>
-                <p style="text-align: left;">Upload patient data for Nayana AI analysis.</p>
-
-                <div class="form-group" style="margin-top: 2rem;">
-                    <label>Reported Symptoms</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="symptoms-input" placeholder="e.g., blurry vision, redness...">
-                        <button onclick="startVoice()" class="btn-icon" title="Use Voice Input">🎤</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Duration of Symptoms</label>
-                    <div style="display: flex; gap: 15px; margin-top: 5px; color: var(--sl-text);">
-                        <label><input type="radio" name="duration" style="width: auto;"> <span>< 1 week</span></label>
-                        <label><input type="radio" name="duration" style="width: auto;"> <span>1-4 weeks</span></label>
-                        <label><input type="radio" name="duration" style="width: auto;"> <span>> 1 month</span></label>
-                    </div>
-                </div>
-
-                <div class="form-row" style="margin-top: 1.5rem;">
-                    <div class="form-group">
-                        <label>Front Eye Capture</label>
-                        <input type="file" accept="image/*" capture="user"> 
-                    </div>
-                    <div class="form-group">
-                        <label>Retinal Capture (Fundus)</label>
-                        <input type="file" accept="image/*" capture="environment">
-                    </div>
-                </div>
-
-                <button class="btn-primary" id="analyze-btn" onclick="generateResults()">Analyze Scans with Nayana AI</button>
-
-                <div id="results-area" class="result-card">
-                    <h3 style="margin-bottom: 10px; color: var(--sl-primary);">Analysis Complete</h3>
-                    <p><strong>Front Eye:</strong> <span style="color: #22c55e;">Clear (No Cataract Detected)</span></p>
-                    <p><strong>Retinal Scan:</strong> <span style="color: #ff4b4b;">Flagged for Review (Possible Diabetic Retinopathy)</span></p>
-                    <p style="font-size: 0.85rem; color: var(--sl-text-muted); margin-top: 15px;">*Results generated via local ML models (eye_model_v2_best.pth). Awaiting doctor verification.</p>
-                </div>
-            </div>
-
-        </div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">This app supports <strong style="color:var(--text)">tele-ophthalmology services</strong> and assists qualified professionals in screening and consultation.</p>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px"><strong style="color:var(--yellow)">⚕️ Clinical oversight:</strong> Final diagnosis must be made by a <strong style="color:var(--text)">licensed eye care professional</strong>.</p>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">By using this app you agree to provide accurate information, follow medical advice, and seek <strong style="color:var(--primary)">immediate care in emergencies</strong>.</p>
+    <div class="alert alert-err" style="margin-bottom:16px">🚨 <strong>Emergency Notice:</strong> This app is <em>not</em> for emergencies. Sudden vision loss — go to a hospital immediately.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('consent-overlay').innerHTML='<div style=padding:40px;text-align:center;color:var(--muted)>You must accept to use Nayana. Please close this tab.</div>'">✗ Decline</button>
+      <button class="btn btn-primary" style="flex:1;margin-top:0" onclick="acceptConsent()">✓ Accept &amp; Continue</button>
     </div>
+  </div>
+</div>
 
-    <script>
-        // 1. Light/Dark Mode Toggle
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
+<!-- ══════════════ APP (hidden until consent) ══════════════ -->
+<div id="app" style="display:none;flex:1;display:none">
 
-        // 2. Switch between Sign In and Create Account tabs
-        function switchAuthTab(tabName) {
-            document.getElementById('tab-signin').classList.remove('active');
-            document.getElementById('tab-create').classList.remove('active');
-            document.getElementById('tab-' + tabName).classList.add('active');
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="brand">nayana</div>
+  <div class="brand-sub">AI Eye Screening</div>
+  <hr class="divider">
+  <div class="nav-section" data-i18n="nav_navigation">NAVIGATION</div>
+  <div id="nav-items"></div>
+  <hr class="divider">
+  <div class="nav-section" data-i18n="nav_stats">MY STATS</div>
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-label" data-i18n="stat_screenings">Screenings</div>
+      <div class="stat-val" id="stat-screenings">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label" data-i18n="stat_reviewed">Reviewed</div>
+      <div class="stat-val" id="stat-reviewed">0</div>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
+    <select id="lang-sel" onchange="setLang(this.value)" style="background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;flex:1">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="kn">ಕನ್ನಡ</option>
+    </select>
+    <button class="btn btn-sm btn-outline" onclick="logout()" data-i18n="btn_logout">Logout</button>
+  </div>
+</div>
 
-            document.getElementById('tab-content-signin').classList.remove('active');
-            document.getElementById('tab-content-create').classList.remove('active');
-            document.getElementById('tab-content-' + tabName).classList.add('active');
-        }
+<!-- MAIN -->
+<div id="main">
+  <div id="toolbar" style="display:none"></div>
 
-        // 3. Handle successful login/creation -> Move to Screening Dashboard
-        function loginSuccess() {
-            document.getElementById('view-auth').classList.remove('active');
-            document.getElementById('view-screening-dash').classList.add('active');
-            
-            // Update Sidebar Highlights
-            document.getElementById('nav-auth').classList.remove('active');
-            document.getElementById('nav-screening').classList.add('active');
-        }
+  <!-- ── AUTH ── -->
+  <div id="view-auth" class="view active">
+    <div id="view-auth-inner">
+      <div class="auth-logo">
+        <div class="logo">nayana</div>
+        <p data-i18n="auth_subtitle">AI-powered eye screening platform</p>
+      </div>
+      <div class="role-tabs">
+        <div class="role-tab active" onclick="setRole('patient')" id="rtab-patient" data-i18n="role_patient">Patient</div>
+        <div class="role-tab" onclick="setRole('doctor')" id="rtab-doctor" data-i18n="role_doctor">Doctor</div>
+        <div class="role-tab" onclick="setRole('admin')" id="rtab-admin" data-i18n="role_admin">Admin</div>
+      </div>
+      <div id="auth-panel"></div>
+    </div>
+  </div>
 
-        // 4. Voice Input (Web Speech API)
-        function startVoice() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                const recognition = new SpeechRecognition();
-                recognition.start();
-                const input = document.getElementById('symptoms-input');
-                input.placeholder = "Listening...";
-                
-                recognition.onresult = function(event) {
-                    input.value = event.results[0][0].transcript;
-                    input.placeholder = "e.g., blurry vision, redness...";
-                };
-                recognition.onerror = function() {
-                    input.placeholder = "e.g., blurry vision, redness...";
-                    alert("Voice recognition failed. Please try again or type.");
-                }
-            } else {
-                alert("Voice recognition is not supported in this browser. Please type the symptoms.");
-            }
-        }
+  <!-- ── PATIENT: SCREENING ── -->
+  <div id="view-screening" class="view">
+    <div class="page-title" data-i18n="page_screening">New Screening</div>
+    <div class="page-sub" data-i18n="page_screening_sub">Complete all 3 steps for an AI analysis report.</div>
+    <div class="step-bar" id="step-bar"></div>
+    <div id="step-content"></div>
+  </div>
 
-        // 5. Result Generation Simulation
-        function generateResults() {
-            const btn = document.getElementById('analyze-btn');
-            btn.textContent = "Processing images...";
-            btn.style.opacity = "0.7";
-            
-            // Simulating API delay before showing results
-            setTimeout(() => {
-                document.getElementById('results-area').style.display = "block";
-                btn.textContent = "Analyze Scans with Nayana AI";
-                btn.style.opacity = "1";
-                
-                // Update stats in sidebar
-                document.getElementById('stat-screenings').textContent = "1";
-            }, 2000); // 2 second fake loading time
-        }
-    </script>
+  <!-- ── PATIENT: REPORTS ── -->
+  <div id="view-reports" class="view">
+    <div class="page-title" data-i18n="page_reports">My Reports</div>
+    <div class="page-sub" data-i18n="page_reports_sub">All your past screenings and doctor reviews.</div>
+    <div id="reports-list"></div>
+  </div>
+
+  <!-- ── DOCTOR DASHBOARD ── -->
+  <div id="view-doctor" class="view">
+    <div class="page-title" data-i18n="page_doctor">Doctor Dashboard</div>
+    <div class="page-sub" data-i18n="page_doctor_sub">Patient cases referred to you.</div>
+    <div id="doctor-cases"></div>
+  </div>
+
+  <!-- ── ADMIN DASHBOARD ── -->
+  <div id="view-admin" class="view">
+    <div class="page-title" data-i18n="page_admin">Admin Dashboard</div>
+    <div class="page-sub" data-i18n="page_admin_sub">Manage doctor registrations and approvals.</div>
+    <div id="admin-table"></div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// I18N
+// ══════════════════════════════════════════════════════════════
+const T = {
+  en:{
+    nav_navigation:'NAVIGATION',nav_stats:'MY STATS',stat_screenings:'Screenings',
+    stat_reviewed:'Reviewed',btn_logout:'Logout',auth_subtitle:'AI-powered eye screening platform',
+    role_patient:'Patient',role_doctor:'Doctor',role_admin:'Admin',
+    page_screening:'New Screening',page_screening_sub:'Complete all 3 steps for an AI analysis report.',
+    page_reports:'My Reports',page_reports_sub:'All your past screenings and doctor reviews.',
+    page_doctor:'Doctor Dashboard',page_doctor_sub:'Patient cases referred to you.',
+    page_admin:'Admin Dashboard',page_admin_sub:'Manage doctor registrations and approvals.',
+    nav_screening:'New Screening',nav_reports:'My Reports',nav_doctor:'Dashboard',nav_admin:'Manage Doctors',
+    step1:'Symptoms',step2:'Eye Photos',step3:'Results',
+    lbl_symptoms:'Describe your symptoms',lbl_duration:'Duration of symptoms',
+    lbl_front:'Front Eye Capture',lbl_retinal:'Retinal / Fundus Capture',
+    btn_camera:'Open Camera',btn_upload:'Upload File',btn_capture:'Capture',btn_analyze:'Analyze with Nayana AI',
+    btn_pdf:'Download PDF Report',btn_send_doc:'Send Report to Specialist',
+    btn_new_screening:'Start New Screening',
+    no_specialists:'No approved specialists available in your area.',
+    analyzing:'Analyzing images…',
+    dur_1w:'< 1 week',dur_4w:'1–4 weeks',dur_1m:'> 1 month'
+  },
+  hi:{
+    nav_navigation:'नेविगेशन',nav_stats:'मेरे आँकड़े',stat_screenings:'स्क्रीनिंग',
+    stat_reviewed:'समीक्षित',btn_logout:'लॉग आउट',auth_subtitle:'AI-संचालित नेत्र जांच मंच',
+    role_patient:'रोगी',role_doctor:'डॉक्टर',role_admin:'व्यवस्थापक',
+    page_screening:'नई स्क्रीनिंग',page_screening_sub:'AI विश्लेषण के लिए सभी 3 चरण पूरे करें।',
+    page_reports:'मेरी रिपोर्ट',page_reports_sub:'आपकी सभी पुरानी स्क्रीनिंग।',
+    page_doctor:'डॉक्टर डैशबोर्ड',page_doctor_sub:'आपको रेफर किए गए मरीज़।',
+    page_admin:'व्यवस्थापक डैशबोर्ड',page_admin_sub:'डॉक्टर पंजीकरण प्रबंधित करें।',
+    nav_screening:'नई स्क्रीनिंग',nav_reports:'मेरी रिपोर्ट',nav_doctor:'डैशबोर्ड',nav_admin:'डॉक्टर प्रबंधन',
+    step1:'लक्षण',step2:'आँख की तस्वीरें',step3:'परिणाम',
+    lbl_symptoms:'अपने लक्षण बताएं',lbl_duration:'लक्षणों की अवधि',
+    lbl_front:'सामने की आँख',lbl_retinal:'रेटिना / फंडस',
+    btn_camera:'कैमरा खोलें',btn_upload:'फ़ाइल अपलोड',btn_capture:'कैप्चर करें',btn_analyze:'Nayana AI से विश्लेषण',
+    btn_pdf:'PDF रिपोर्ट डाउनलोड',btn_send_doc:'विशेषज्ञ को भेजें',
+    btn_new_screening:'नई स्क्रीनिंग शुरू करें',
+    no_specialists:'आपके क्षेत्र में कोई अनुमोदित विशेषज्ञ नहीं है।',
+    analyzing:'छवियों का विश्लेषण हो रहा है…',
+    dur_1w:'< 1 सप्ताह',dur_4w:'1–4 सप्ताह',dur_1m:'> 1 महीना'
+  },
+  kn:{
+    nav_navigation:'ನ್ಯಾವಿಗೇಷನ್',nav_stats:'ನನ್ನ ಅಂಕಿಅಂಶ',stat_screenings:'ಸ್ಕ್ರೀನಿಂಗ್',
+    stat_reviewed:'ವಿಮರ್ಶಿಸಲಾಗಿದೆ',btn_logout:'ಲಾಗ್ ಔಟ್',auth_subtitle:'AI-ಚಾಲಿತ ನೇತ್ರ ತಪಾಸಣಾ ವೇದಿಕೆ',
+    role_patient:'ರೋಗಿ',role_doctor:'ವೈದ್ಯ',role_admin:'ನಿರ್ವಾಹಕ',
+    page_screening:'ಹೊಸ ತಪಾಸಣೆ',page_screening_sub:'AI ವಿಶ್ಲೇಷಣೆಗಾಗಿ 3 ಹಂತಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.',
+    page_reports:'ನನ್ನ ವರದಿಗಳು',page_reports_sub:'ನಿಮ್ಮ ಎಲ್ಲಾ ಸ್ಕ್ರೀನಿಂಗ್‌ಗಳು.',
+    page_doctor:'ವೈದ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',page_doctor_sub:'ನಿಮಗೆ ರೆಫರ್ ಮಾಡಲಾದ ರೋಗಿಗಳು.',
+    page_admin:'ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',page_admin_sub:'ವೈದ್ಯರ ನೋಂದಣಿ ನಿರ್ವಹಿಸಿ.',
+    nav_screening:'ಹೊಸ ತಪಾಸಣೆ',nav_reports:'ನನ್ನ ವರದಿಗಳು',nav_doctor:'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',nav_admin:'ವೈದ್ಯರ ನಿರ್ವಹಣೆ',
+    step1:'ರೋಗಲಕ್ಷಣಗಳು',step2:'ಕಣ್ಣಿನ ಚಿತ್ರಗಳು',step3:'ಫಲಿತಾಂಶಗಳು',
+    lbl_symptoms:'ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ',lbl_duration:'ರೋಗಲಕ್ಷಣಗಳ ಅವಧಿ',
+    lbl_front:'ಮುಂಭಾಗದ ಕಣ್ಣು',lbl_retinal:'ರೆಟಿನಾ / ಫಂಡಸ್',
+    btn_camera:'ಕ್ಯಾಮೆರಾ ತೆರೆಯಿರಿ',btn_upload:'ಫೈಲ್ ಅಪ್ಲೋಡ್',btn_capture:'ಕ್ಯಾಪ್ಚರ್',btn_analyze:'Nayana AI ವಿಶ್ಲೇಷಣೆ',
+    btn_pdf:'PDF ರಿಪೋರ್ಟ್ ಡೌನ್‌ಲೋಡ್',btn_send_doc:'ತಜ್ಞರಿಗೆ ಕಳುಹಿಸಿ',
+    btn_new_screening:'ಹೊಸ ತಪಾಸಣೆ ಪ್ರಾರಂಭಿಸಿ',
+    no_specialists:'ನಿಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ಅನುಮೋದಿತ ತಜ್ಞರಿಲ್ಲ.',
+    analyzing:'ಚಿತ್ರಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ…',
+    dur_1w:'< 1 ವಾರ',dur_4w:'1–4 ವಾರಗಳು',dur_1m:'> 1 ತಿಂಗಳು'
+  }
+};
+let LANG = localStorage.getItem('nayana_lang')||'en';
+function t(k){return(T[LANG]&&T[LANG][k])||T.en[k]||k}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(T[LANG]&&T[LANG][k])el.textContent=T[LANG][k];
+  });
+}
+function setLang(l){LANG=l;localStorage.setItem('nayana_lang',l);applyLang();renderCurrentView()}
+
+// ══════════════════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════════════════
+let THEME=localStorage.getItem('nayana_theme')||'dark';
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',THEME);
+  const btn=document.getElementById('theme-btn');
+  if(btn)btn.textContent=THEME==='dark'?'☀️':'🌙';
+}
+function toggleTheme(){
+  THEME=THEME==='dark'?'light':'dark';
+  localStorage.setItem('nayana_theme',THEME);
+  applyTheme();
+}
+
+// ══════════════════════════════════════════════════════════════
+// MOCK DB (localStorage)
+// ══════════════════════════════════════════════════════════════
+const DB={
+  getUsers:()=>JSON.parse(localStorage.getItem('nayana_users')||'{"patients":{},"doctors":{}}'),
+  saveUsers:u=>localStorage.setItem('nayana_users',JSON.stringify(u)),
+  getCases:()=>JSON.parse(localStorage.getItem('nayana_cases')||'[]'),
+  saveCases:c=>localStorage.setItem('nayana_cases',JSON.stringify(c)),
+  getSession:()=>JSON.parse(localStorage.getItem('nayana_session')||'null'),
+  saveSession:s=>localStorage.setItem('nayana_session',JSON.stringify(s)),
+  clearSession:()=>localStorage.removeItem('nayana_session'),
+  getApprovedDoctors(){
+    const u=this.getUsers();
+    return Object.values(u.doctors||{}).filter(d=>d.verificationStatus==='approved');
+  },
+  getAllDoctors(){
+    const u=this.getUsers();
+    return Object.values(u.doctors||{});
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let currentRole='patient'; // for auth tab
+let currentView='auth';
+let screeningStep=1;
+let screeningData={symptoms:'',duration:'',frontImg:null,retinalImg:null,aiResult:null};
+let frontStream=null,retinalStream=null;
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=(type==='ok'?'✓ ':type==='err'?'✗ ':'⚠ ')+msg;
+  el.style.borderColor=type==='ok'?'var(--green)':type==='err'?'var(--primary)':'var(--yellow)';
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROUTER
+// ══════════════════════════════════════════════════════════════
+function showView(id){
+  currentView=id;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-'+id);
+  if(v)v.classList.add('active');
+  renderCurrentView();
+  updateSidebar();
+}
+function renderCurrentView(){
+  if(currentView==='auth')renderAuth();
+  else if(currentView==='screening')renderScreening();
+  else if(currentView==='reports')renderReports();
+  else if(currentView==='doctor')renderDoctorDash();
+  else if(currentView==='admin')renderAdminDash();
+  applyLang();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════════════════
+function updateSidebar(){
+  const sess=DB.getSession();
+  const navEl=document.getElementById('nav-items');
+  navEl.innerHTML='';
+  if(!sess){navEl.innerHTML='';updateStats();return;}
+  let items=[];
+  if(sess.role==='patient'){
+    items=[
+      {id:'screening',label:t('nav_screening')},
+      {id:'reports',label:t('nav_reports')}
+    ];
+  } else if(sess.role==='doctor'){
+    items=[{id:'doctor',label:t('nav_doctor')}];
+  } else if(sess.role==='admin'){
+    items=[{id:'admin',label:t('nav_admin')}];
+  }
+  items.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='nav-item'+(currentView===item.id?' active':'');
+    d.textContent=item.label;
+    d.onclick=()=>showView(item.id);
+    navEl.appendChild(d);
+  });
+  updateStats();
+}
+function updateStats(){
+  const sess=DB.getSession();
+  if(!sess||sess.role!=='patient'){
+    document.getElementById('stat-screenings').textContent='—';
+    document.getElementById('stat-reviewed').textContent='—';
+    return;
+  }
+  const cases=DB.getCases().filter(c=>c.patientEmail===sess.user.email);
+  document.getElementById('stat-screenings').textContent=cases.length;
+  document.getElementById('stat-reviewed').textContent=cases.filter(c=>c.status==='Reviewed').length;
+}
+
+// ══════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════
+function setRole(r){
+  currentRole=r;
+  ['patient','doctor','admin'].forEach(x=>{
+    document.getElementById('rtab-'+x).classList.toggle('active',x===r);
+  });
+  renderAuthPanel();
+}
+function renderAuth(){
+  // role tabs already in HTML; just render the panel
+  renderAuthPanel();
+}
+function renderAuthPanel(){
+  const p=document.getElementById('auth-panel');
+  if(currentRole==='patient') p.innerHTML=patientAuthHTML();
+  else if(currentRole==='doctor') p.innerHTML=doctorAuthHTML();
+  else p.innerHTML=adminAuthHTML();
+}
+function patientAuthHTML(){
+  return`
+  <div class="tabs">
+    <div class="tab active" id="ptab-login" onclick="switchPTab('login')">Sign In</div>
+    <div class="tab" id="ptab-register" onclick="switchPTab('register')">Create Account</div>
+  </div>
+  <div id="ptab-content-login">
+    <div class="form-group"><label>Email</label><input id="p-login-email" type="email" placeholder="you@example.com"/></div>
+    <div class="form-group"><label>Password</label><input id="p-login-pass" type="password" placeholder="••••••••"/></div>
+    <div id="p-login-err"></div>
+    <button class="btn btn-primary" onclick="patientLogin()">Sign In</button>
+  </div>
+  <div id="ptab-content-register" style="display:none">
+    <div class="form-row">
+      <div class="form-group" style="flex:2"><label>Full Name</label><input id="p-reg-name" type="text" placeholder="Anagha B L"/></div>
+      <div class="form-group" style="flex:1"><label>Age</label><input id="p-reg-age" type="number" placeholder="25"/></div>
+    </div>
+    <div class="form-group"><label>Gender</label>
+      <select id="p-reg-gender"><option>Female</option><option>Male</option><option>Other</option></select>
+    </div>
+    <div class="form-group"><label>Email</label><input id="p-reg-email" type="email" placeholder="you@example.com"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Password</label><input id="p-reg-pass" type="password" placeholder="••••••••"/></div>
+      <div class="form-group"><label>Confirm Password</label><input id="p-reg-pass2" type="password" placeholder="••••••••"/></div>
+    </div>
+    <div id="p-reg-err"></div>
+    <button class="btn btn-primary" onclick="patientRegister()">Create Account</button>
+  </div>`;
+}
+function switchPTab(t){
+  document.getElementById('ptab-login').classList.toggle('active',t==='login');
+  document.getElementById('ptab-register').classList.toggle('active',t==='register');
+  document.getElementById('ptab-content-login').style.display=t==='login'?'block':'none';
+  document.getElementById('ptab-content-register').style.display=t==='register'?'block':'none';
+}
+function doctorAuthHTML(){
+  return`
+  <div class="tabs">
+    <div class="tab active" id="dtab-login" onclick="switchDTab('login')">Sign In</div>
+    <div class="tab" id="dtab-register" onclick="switchDTab('register')">Register</div>
+  </div>
+  <div id="dtab-content-login">
+    <div class="form-group"><label>Email</label><input id="d-login-email" type="email"/></div>
+    <div class="form-group"><label>Password</label><input id="d-login-pass" type="password"/></div>
+    <div id="d-login-err"></div>
+    <button class="btn btn-primary" onclick="doctorLogin()">Sign In</button>
+  </div>
+  <div id="dtab-content-register" style="display:none">
+    <div class="form-row">
+      <div class="form-group" style="flex:2"><label>Full Name</label><input id="d-reg-name" type="text"/></div>
+      <div class="form-group" style="flex:1"><label>Specialization</label><input id="d-reg-spec" type="text" placeholder="Ophthalmology"/></div>
+    </div>
+    <div class="form-group"><label>Hospital / Clinic</label><input id="d-reg-hosp" type="text"/></div>
+    <div class="form-group"><label>License ID</label><input id="d-reg-lic" type="text" placeholder="MCI-12345"/></div>
+    <div class="form-group"><label>Email</label><input id="d-reg-email" type="email"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Password</label><input id="d-reg-pass" type="password"/></div>
+      <div class="form-group"><label>Confirm Password</label><input id="d-reg-pass2" type="password"/></div>
+    </div>
+    <div class="form-group">
+      <label>Certificate Upload (PDF/JPG/PNG)</label>
+      <input id="d-reg-cert" type="file" accept=".pdf,.jpg,.jpeg,.png"/>
+    </div>
+    <div id="d-reg-err"></div>
+    <button class="btn btn-primary" onclick="doctorRegister()">Submit Registration</button>
+  </div>`;
+}
+function switchDTab(t){
+  document.getElementById('dtab-login').classList.toggle('active',t==='login');
+  document.getElementById('dtab-register').classList.toggle('active',t==='register');
+  document.getElementById('dtab-content-login').style.display=t==='login'?'block':'none';
+  document.getElementById('dtab-content-register').style.display=t==='register'?'block':'none';
+}
+function adminAuthHTML(){
+  return`
+  <div class="card">
+    <div class="card-title">Admin Login</div>
+    <div class="card-sub">Use admin / admin123</div>
+    <div class="form-group"><label>Username</label><input id="a-user" type="text" placeholder="admin"/></div>
+    <div class="form-group"><label>Password</label><input id="a-pass" type="password" placeholder="admin123"/></div>
+    <div id="a-err"></div>
+    <button class="btn btn-primary" onclick="adminLogin()">Sign In as Admin</button>
+  </div>`;
+}
+
+// ── Patient auth logic ─────────────────────────────────────────
+function patientLogin(){
+  const email=document.getElementById('p-login-email').value.trim();
+  const pass=document.getElementById('p-login-pass').value;
+  const users=DB.getUsers();
+  const u=users.patients[email];
+  if(!u||u.password!==pass){
+    document.getElementById('p-login-err').innerHTML='<div class="alert alert-err">Invalid email or password.</div>';
+    return;
+  }
+  DB.saveSession({role:'patient',user:{name:u.name,email:u.email,age:u.age,gender:u.gender}});
+  afterLogin();
+}
+function patientRegister(){
+  const name=document.getElementById('p-reg-name').value.trim();
+  const age=document.getElementById('p-reg-age').value;
+  const gender=document.getElementById('p-reg-gender').value;
+  const email=document.getElementById('p-reg-email').value.trim();
+  const pass=document.getElementById('p-reg-pass').value;
+  const pass2=document.getElementById('p-reg-pass2').value;
+  if(!name||!email||!pass){document.getElementById('p-reg-err').innerHTML='<div class="alert alert-err">Please fill all required fields.</div>';return;}
+  if(pass!==pass2){document.getElementById('p-reg-err').innerHTML='<div class="alert alert-err">Passwords do not match.</div>';return;}
+  const users=DB.getUsers();
+  if(users.patients[email]){document.getElementById('p-reg-err').innerHTML='<div class="alert alert-err">Email already registered.</div>';return;}
+  users.patients[email]={name,age,gender,email,password:pass,createdAt:new Date().toISOString()};
+  DB.saveUsers(users);
+  DB.saveSession({role:'patient',user:{name,email,age,gender}});
+  afterLogin();
+}
+
+// ── Doctor auth logic ──────────────────────────────────────────
+function doctorLogin(){
+  const email=document.getElementById('d-login-email').value.trim();
+  const pass=document.getElementById('d-login-pass').value;
+  const users=DB.getUsers();
+  const d=users.doctors[email];
+  if(!d||d.password!==pass){
+    document.getElementById('d-login-err').innerHTML='<div class="alert alert-err">Invalid email or password.</div>';
+    return;
+  }
+  if(d.verificationStatus==='pending'){
+    document.getElementById('d-login-err').innerHTML='<div class="alert alert-warn">Access Denied: Pending Verification. Please wait for admin approval.</div>';
+    return;
+  }
+  if(d.verificationStatus==='rejected'){
+    document.getElementById('d-login-err').innerHTML='<div class="alert alert-err">Your registration was rejected. Contact support.</div>';
+    return;
+  }
+  DB.saveSession({role:'doctor',user:{name:d.name,email:d.email,specialization:d.specialization,hospital:d.hospital}});
+  afterLogin();
+}
+async function doctorRegister(){
+  const name=document.getElementById('d-reg-name').value.trim();
+  const spec=document.getElementById('d-reg-spec').value.trim();
+  const hosp=document.getElementById('d-reg-hosp').value.trim();
+  const lic=document.getElementById('d-reg-lic').value.trim();
+  const email=document.getElementById('d-reg-email').value.trim();
+  const pass=document.getElementById('d-reg-pass').value;
+  const pass2=document.getElementById('d-reg-pass2').value;
+  const certFile=document.getElementById('d-reg-cert').files[0];
+  if(!name||!lic||!email||!pass){document.getElementById('d-reg-err').innerHTML='<div class="alert alert-err">Please fill all required fields.</div>';return;}
+  if(pass!==pass2){document.getElementById('d-reg-err').innerHTML='<div class="alert alert-err">Passwords do not match.</div>';return;}
+  const users=DB.getUsers();
+  if(users.doctors[email]){document.getElementById('d-reg-err').innerHTML='<div class="alert alert-err">Email already registered.</div>';return;}
+
+  // Upload certificate to server if provided
+  let certFilename=null;
+  if(certFile){
+    try{
+      const fd=new FormData();fd.append('certificate',certFile);
+      const r=await fetch('/api/auth/doctor/register',{method:'POST',body:fd});
+      // Server also saves; we mirror in localStorage
+    }catch(e){}
+    certFilename=certFile.name;
+  }
+
+  users.doctors[email]={
+    name,specialization:spec,hospital:hosp,licenseNo:lic,
+    email,password:pass,verificationStatus:'pending',
+    certFilename,certDataURL:null,
+    createdAt:new Date().toISOString()
+  };
+  // Store certificate as dataURL for admin "View License" button
+  if(certFile){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const u2=DB.getUsers();
+      u2.doctors[email].certDataURL=e.target.result;
+      DB.saveUsers(u2);
+    };
+    reader.readAsDataURL(certFile);
+  }
+  DB.saveUsers(users);
+  document.getElementById('d-reg-err').innerHTML='<div class="alert alert-ok">Registration submitted! Awaiting admin approval.</div>';
+}
+
+// ── Admin auth logic ───────────────────────────────────────────
+function adminLogin(){
+  const u=document.getElementById('a-user').value.trim();
+  const p=document.getElementById('a-pass').value;
+  if(u==='admin'&&p==='admin123'){
+    DB.saveSession({role:'admin',user:{name:'Admin'}});
+    afterLogin();
+  } else {
+    document.getElementById('a-err').innerHTML='<div class="alert alert-err">Invalid credentials. Use admin / admin123</div>';
+  }
+}
+
+function afterLogin(){
+  const sess=DB.getSession();
+  if(!sess)return;
+  if(sess.role==='patient')showView('screening');
+  else if(sess.role==='doctor')showView('doctor');
+  else if(sess.role==='admin')showView('admin');
+  toast('Welcome, '+sess.user.name+'!');
+}
+
+function logout(){
+  if(frontStream){frontStream.getTracks().forEach(t=>t.stop());frontStream=null;}
+  if(retinalStream){retinalStream.getTracks().forEach(t=>t.stop());retinalStream=null;}
+  DB.clearSession();
+  screeningStep=1;
+  screeningData={symptoms:'',duration:'',frontImg:null,retinalImg:null,aiResult:null};
+  showView('auth');
+  toast('Logged out.','warn');
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP BAR
+// ══════════════════════════════════════════════════════════════
+function renderStepBar(current){
+  const steps=[t('step1'),t('step2'),t('step3')];
+  let html='<div class="step-bar">';
+  steps.forEach((s,i)=>{
+    const n=i+1;
+    let dc='',lc='',di=n;
+    if(n<current){dc='done';lc='done';di='✓';}
+    else if(n===current){dc='active';lc='active';}
+    html+=`<div class="step-dot ${dc}">${di}</div><span class="step-label ${lc}">${s}</span>`;
+    if(i<steps.length-1)html+=`<div class="step-line${n<current?' done':''}"></div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCREENING
+// ══════════════════════════════════════════════════════════════
+function renderScreening(){
+  document.getElementById('step-bar').innerHTML=renderStepBar(screeningStep).replace('<div class="step-bar">','').replace('</div>','');
+  const c=document.getElementById('step-content');
+  if(screeningStep===1)c.innerHTML=renderStep1();
+  else if(screeningStep===2)c.innerHTML=renderStep2();
+  else if(screeningStep===3)c.innerHTML=renderStep3();
+}
+
+// ── STEP 1: Symptoms ──────────────────────────────────────────
+function renderStep1(){
+  return`
+  <div class="card">
+    <div class="card-title">${t('step1')}</div>
+    <div class="card-sub">Tell us what you're experiencing.</div>
+    <div class="form-group">
+      <label>${t('lbl_symptoms')}</label>
+      <div style="display:flex;gap:8px">
+        <textarea id="symp-input" placeholder="e.g., blurry vision, redness, floaters…">${screeningData.symptoms}</textarea>
+        <button class="btn-icon" onclick="startVoice()" title="Voice input" style="height:80px;align-self:flex-start">🎤</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>${t('lbl_duration')}</label>
+      <div style="display:flex;gap:16px;margin-top:6px">
+        ${['dur_1w','dur_4w','dur_1m'].map((k,i)=>`
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="radio" name="dur" value="${i}" style="width:auto" ${screeningData.duration==i?'checked':''}> ${t(k)}
+        </label>`).join('')}
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveStep1()">Next: Eye Photos →</button>
+  </div>`;
+}
+function saveStep1(){
+  const symp=document.getElementById('symp-input').value.trim();
+  const durEl=document.querySelector('input[name="dur"]:checked');
+  if(!symp){toast('Please describe your symptoms first.','warn');return;}
+  screeningData.symptoms=symp;
+  screeningData.duration=durEl?durEl.value:'0';
+  screeningStep=2;renderScreening();
+}
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice recognition not supported in this browser.','warn');return;}
+  const rec=new SR();
+  rec.lang=LANG==='hi'?'hi-IN':LANG==='kn'?'kn-IN':'en-IN';
+  const inp=document.getElementById('symp-input');
+  inp.placeholder='Listening…';
+  rec.start();
+  rec.onresult=e=>{inp.value+=' '+e.results[0][0].transcript;inp.placeholder='e.g., blurry vision…'};
+  rec.onerror=()=>{inp.placeholder='e.g., blurry vision…';toast('Voice input failed. Please type.','err')};
+}
+
+// ── STEP 2: Eye Photos ────────────────────────────────────────
+function renderStep2(){
+  return`
+  <div class="card">
+    <div class="card-title">${t('step2')}</div>
+    <div class="card-sub">Capture or upload both eye images for AI analysis.</div>
+    <div class="form-row" style="gap:16px">
+      <div class="form-group" style="flex:1">
+        ${captureBoxHTML('front')}
+      </div>
+      <div class="form-group" style="flex:1">
+        ${captureBoxHTML('retinal')}
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-outline" onclick="screeningStep=1;renderScreening()">← Back</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveStep2()">${t('btn_analyze')}</button>
+    </div>
+  </div>`;
+}
+function captureBoxHTML(type){
+  const label=type==='front'?t('lbl_front'):t('lbl_retinal');
+  const hasImg=type==='front'?screeningData.frontImg:screeningData.retinalImg;
+  return`
+  <div class="capture-box" id="cap-box-${type}">
+    <div class="cap-label">${label}</div>
+    ${hasImg?`<img class="preview" src="${hasImg}" alt="preview"/>`:'<div style="font-size:32px;color:var(--muted);margin:10px 0">👁</div>'}
+    <video id="vid-${type}" autoplay playsinline style="display:none;width:100%;border-radius:8px"></video>
+    <canvas id="canvas-${type}" style="display:none"></canvas>
+    <div class="cap-btns">
+      <button class="btn btn-sm btn-outline" onclick="openCamera('${type}')">${t('btn_camera')}</button>
+      <button class="btn btn-sm btn-outline" onclick="document.getElementById('file-${type}').click()">${t('btn_upload')}</button>
+      <button class="btn btn-sm btn-green" id="cap-btn-${type}" onclick="captureFrame('${type}')" style="display:none">${t('btn_capture')}</button>
+    </div>
+    <input type="file" id="file-${type}" accept="image/*" style="display:none" onchange="fileSelected('${type}',this)"/>
+  </div>`;
+}
+async function openCamera(type){
+  try{
+    const facing=type==='front'?'user':'environment';
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});
+    if(type==='front'){if(frontStream)frontStream.getTracks().forEach(t=>t.stop());frontStream=stream;}
+    else{if(retinalStream)retinalStream.getTracks().forEach(t=>t.stop());retinalStream=stream;}
+    const vid=document.getElementById('vid-'+type);
+    vid.srcObject=stream;vid.style.display='block';
+    document.getElementById('cap-btn-'+type).style.display='inline-block';
+  }catch(e){toast('Camera access denied or unavailable.','err');}
+}
+function captureFrame(type){
+  const vid=document.getElementById('vid-'+type);
+  const canvas=document.getElementById('canvas-'+type);
+  canvas.width=vid.videoWidth;canvas.height=vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid,0,0);
+  const dataURL=canvas.toDataURL('image/jpeg',0.8);
+  if(type==='front')screeningData.frontImg=dataURL;
+  else screeningData.retinalImg=dataURL;
+  vid.style.display='none';
+  document.getElementById('cap-btn-'+type).style.display='none';
+  const str=type==='front'?frontStream:retinalStream;
+  if(str)str.getTracks().forEach(t=>t.stop());
+  // Re-render to show preview
+  renderScreening();
+}
+function fileSelected(type,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(type==='front')screeningData.frontImg=e.target.result;
+    else screeningData.retinalImg=e.target.result;
+    renderScreening();
+  };
+  reader.readAsDataURL(file);
+}
+function saveStep2(){
+  if(!screeningData.frontImg||!screeningData.retinalImg){
+    toast('Please provide both eye images before analyzing.','warn');return;
+  }
+  screeningStep=3;
+  screeningData.aiResult=null; // will compute
+  renderScreening();
+  setTimeout(runAI,300);
+}
+
+// ── STEP 3: Results ───────────────────────────────────────────
+const DISEASE_INFO={
+  'Normal':{icon:'✅',what:'Your eyes appear healthy with no significant conditions detected.',symptoms:'No major symptoms reported.',urgency:'📅 Routine eye checkup every 1–2 years recommended.',tip:'Maintain healthy vision with UV-protective glasses and regular checkups.',risk:'low',hospitals:[{name:'Narayana Nethralaya, Bangalore',dist:'2.1 km'},{name:'M S Ramaiah Eye Hospital',dist:'3.8 km'},{name:'Sankara Eye Hospital',dist:'5.2 km'}]},
+  'Cataract':{icon:'🌫️',what:'The natural lens inside your eye has become cloudy, like a foggy window.',symptoms:'Blurry vision, glare sensitivity, faded colors, night driving difficulty.',urgency:'📅 Schedule an appointment within 1–3 months.',tip:'Cataract surgery is one of the safest procedures in the world — it restores vision in under 30 minutes.',risk:'moderate',hospitals:[{name:'Narayana Nethralaya (Cataract Centre)',dist:'2.1 km'},{name:'L V Prasad Eye Institute',dist:'4.3 km'},{name:'Aravind Eye Hospital',dist:'6.7 km'}]},
+  'Diabetic Retinopathy':{icon:'🩸',what:'High blood sugar has damaged tiny blood vessels in your retina.',symptoms:'Blurred vision, dark floaters, difficulty seeing at night, sudden vision loss.',urgency:'⚠️ See a retinal specialist within 1–2 weeks.',tip:'Controlling blood sugar is the most important step. Eye checkups every 6–12 months if diabetic.',risk:'high',hospitals:[{name:'Retina Institute of Karnataka',dist:'1.9 km'},{name:'Minto Eye Hospital',dist:'3.5 km'},{name:'Narayana Nethralaya (Retina Clinic)',dist:'4.1 km'}]},
+  'Glaucoma':{icon:'🌀',what:'Pressure inside your eye is slowly damaging your optic nerve.',symptoms:'Gradual peripheral vision loss, eye pain, halos around lights.',urgency:'⚠️ See an eye specialist within 1 week.',tip:'Early treatment with eye drops or surgery can halt progression and prevent blindness.',risk:'high',hospitals:[{name:'Glaucoma Foundation Clinic',dist:'2.8 km'},{name:'Vittala Eye Institute',dist:'3.2 km'},{name:'M S Ramaiah Eye Hospital',dist:'4.0 km'}]}
+};
+const DIAGNOSES=['Normal','Cataract','Diabetic Retinopathy','Glaucoma'];
+
+function runAI(){
+  const c=document.getElementById('step-content');
+  c.innerHTML=`
+  <div class="card" style="text-align:center;padding:40px">
+    <div style="font-size:32px;margin-bottom:12px">🔬</div>
+    <div style="font-weight:700;margin-bottom:16px">${t('analyzing')}</div>
+    <div class="progress-wrap"><div class="progress-bar" id="ai-prog" style="width:0%"></div></div>
+    <div style="font-size:12px;color:var(--muted)" id="ai-status">Preprocessing images…</div>
+  </div>`;
+
+  let w=0;
+  const msgs=['Preprocessing images…','Running EfficientNet-B0 model…','Computing GradCAM heatmap…','Generating diagnosis…'];
+  const iv=setInterval(()=>{
+    w+=Math.random()*18+7;
+    if(w>95)w=95;
+    document.getElementById('ai-prog').style.width=w+'%';
+    document.getElementById('ai-status').textContent=msgs[Math.floor(w/25)]||msgs[3];
+  },300);
+
+  setTimeout(()=>{
+    clearInterval(iv);
+    document.getElementById('ai-prog').style.width='100%';
+    // Simulate AI — weighted random (demo)
+    const weights=[0.35,0.25,0.25,0.15];
+    const r=Math.random();let acc=0,diagIdx=0;
+    for(let i=0;i<weights.length;i++){acc+=weights[i];if(r<acc){diagIdx=i;break;}}
+    const diagnosis=DIAGNOSES[diagIdx];
+    // Generate confidence scores
+    const confs={};
+    let remaining=1;
+    DIAGNOSES.forEach((d,i)=>{
+      if(i===diagIdx){confs[d]=0.55+Math.random()*0.35;}
+      else{confs[d]=Math.random()*0.25;}
+    });
+    screeningData.aiResult={diagnosis,confs,timestamp:new Date().toISOString()};
+    renderResultsView();
+    // Save case to localStorage
+    saveCaseToLocalStorage();
+    updateStats();
+  },3200);
+}
+
+function saveCaseToLocalStorage(){
+  const sess=DB.getSession();
+  if(!sess||!screeningData.aiResult)return;
+  const cases=DB.getCases();
+  const newCase={
+    caseId:`CASE-${Date.now()}`,
+    patientEmail:sess.user.email,
+    patientName:sess.user.name,
+    patientAge:sess.user.age||'—',
+    patientGender:sess.user.gender||'—',
+    symptoms:screeningData.symptoms,
+    duration:screeningData.duration,
+    frontImg:screeningData.frontImg,
+    retinalImg:screeningData.retinalImg,
+    diagnosis:screeningData.aiResult.diagnosis,
+    confs:screeningData.aiResult.confs,
+    status:'Pending',
+    sentToDoctor:null,
+    createdAt:new Date().toISOString()
+  };
+  cases.push(newCase);
+  DB.saveCases(cases);
+  screeningData.currentCaseId=newCase.caseId;
+}
+
+function renderResultsView(){
+  const res=screeningData.aiResult;
+  const info=DISEASE_INFO[res.diagnosis]||DISEASE_INFO['Normal'];
+  const riskColor=info.risk==='high'?'var(--primary)':info.risk==='moderate'?'var(--yellow)':'var(--green)';
+  const doctors=DB.getApprovedDoctors();
+
+  let confBars='';
+  DIAGNOSES.forEach(d=>{
+    const pct=Math.round((res.confs[d]||0)*100);
+    confBars+=`
+    <div class="conf-row">
+      <div class="conf-label">${d}</div>
+      <div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:${pct}%;background:${d===res.diagnosis?riskColor:'var(--blue)'}"></div></div>
+      <div class="conf-pct">${pct}%</div>
+    </div>`;
+  });
+
+  let hospHTML='';
+  info.hospitals.forEach(h=>{
+    hospHTML+=`<div class="hosp-card"><div class="hosp-name">🏥 ${h.name}</div><div class="hosp-dist">📍 ${h.dist}</div></div>`;
+  });
+
+  let docSendHTML='';
+  if(doctors.length===0){
+    docSendHTML=`<div class="alert alert-warn" style="margin-top:12px">${t('no_specialists')}</div>`;
+  } else {
+    const opts=doctors.map(d=>`<option value="${d.email}">Dr. ${d.name} — ${d.specialization||'Ophthalmology'} (${d.hospital||''})</option>`).join('');
+    docSendHTML=`
+    <div style="margin-top:12px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:6px">Select Specialist</label>
+      <select id="doc-sel" style="margin-bottom:8px">${opts}</select>
+      <button class="btn btn-primary" onclick="sendToDoctor()" style="margin-top:0">${t('btn_send_doc')}</button>
+    </div>`;
+  }
+
+  document.getElementById('step-content').innerHTML=`
+  <div class="card">
+    <div class="result-header">
+      <div class="result-icon">${info.icon}</div>
+      <div>
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">AI Diagnosis</div>
+        <div class="result-condition" style="color:${riskColor}">${res.diagnosis}</div>
+      </div>
+    </div>
+    <div style="background:var(--input-bg);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">What this means</div>
+      <p style="font-size:14px;line-height:1.6">${info.what}</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:8px"><strong>Symptoms:</strong> ${info.symptoms}</p>
+      <p style="font-size:13px;margin-top:6px">${info.urgency}</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">💡 ${info.tip}</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Confidence Scores</div>
+      ${confBars}
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Recommended Nearby Hospitals</div>
+      ${hospHTML}
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-outline" style="flex:1" onclick="downloadPDF()">📄 ${t('btn_pdf')}</button>
+      <button class="btn btn-outline" onclick="resetScreening()">${t('btn_new_screening')}</button>
+    </div>
+    ${docSendHTML}
+  </div>`;
+}
+
+function sendToDoctor(){
+  const sel=document.getElementById('doc-sel');
+  if(!sel)return;
+  const docEmail=sel.value;
+  const cases=DB.getCases();
+  const idx=cases.findIndex(c=>c.caseId===screeningData.currentCaseId);
+  if(idx===-1){toast('Case not saved yet. Please try again.','err');return;}
+  cases[idx].sentToDoctor=docEmail;
+  cases[idx].status='Sent';
+  DB.saveCases(cases);
+  const docName=sel.options[sel.selectedIndex].text;
+  toast('Report sent to '+docName);
+  sel.parentElement.innerHTML=`<div class="alert alert-ok" style="margin-top:12px">✓ Report successfully sent to ${docName}</div>`;
+}
+
+function resetScreening(){
+  screeningStep=1;
+  screeningData={symptoms:'',duration:'',frontImg:null,retinalImg:null,aiResult:null};
+  renderScreening();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PATIENT REPORTS
+// ══════════════════════════════════════════════════════════════
+function renderReports(){
+  const sess=DB.getSession();
+  const cases=DB.getCases().filter(c=>c.patientEmail===sess.user.email).reverse();
+  const el=document.getElementById('reports-list');
+  if(!cases.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">📋</div><p>No screenings yet. <a onclick="showView('screening')" style="cursor:pointer;color:var(--primary)">Start your first screening →</a></p></div>`;
+    return;
+  }
+  el.innerHTML=cases.map(c=>`
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-weight:700;font-size:15px">${c.diagnosis}</div>
+        <div style="font-size:12px;color:var(--muted)">${new Date(c.createdAt).toLocaleDateString()} · ${c.caseId}</div>
+      </div>
+      <span class="badge badge-${c.status==='Reviewed'?'reviewed':c.status==='Sent'?'approved':'pending'}">${c.status}</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px"><strong>Symptoms:</strong> ${c.symptoms}</p>
+    ${c.sentToDoctor?`<p style="font-size:12px;color:var(--muted)">Sent to: ${c.sentToDoctor}</p>`:''}
+    <button class="btn btn-sm btn-outline" onclick="downloadPDFFromCase(${JSON.stringify(c).replace(/"/g,'&quot;')})">📄 Download PDF</button>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// DOCTOR DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function renderDoctorDash(){
+  const sess=DB.getSession();
+  const cases=DB.getCases().filter(c=>c.sentToDoctor===sess.user.email).reverse();
+  const el=document.getElementById('doctor-cases');
+  if(!cases.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">🩺</div><p>No cases have been referred to you yet.</p></div>`;
+    return;
+  }
+  el.innerHTML=`
+  <table>
+    <thead><tr><th>Patient</th><th>Diagnosis</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    ${cases.map(c=>`
+    <tr>
+      <td><strong>${c.patientName}</strong><br><span style="font-size:11px;color:var(--muted)">${c.patientEmail}</span></td>
+      <td>${c.diagnosis}</td>
+      <td style="font-size:12px;color:var(--muted)">${new Date(c.createdAt).toLocaleDateString()}</td>
+      <td><span class="badge badge-${c.status==='Reviewed'?'reviewed':'pending'}">${c.status}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="showDoctorCase('${c.caseId}')">View</button>
+        ${c.status!=='Reviewed'?`<button class="btn btn-sm btn-green" onclick="markReviewed('${c.caseId}')" style="margin-left:4px">Mark Reviewed</button>`:''}
+      </td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function markReviewed(caseId){
+  const cases=DB.getCases();
+  const idx=cases.findIndex(c=>c.caseId===caseId);
+  if(idx===-1)return;
+  cases[idx].status='Reviewed';
+  cases[idx].reviewedAt=new Date().toISOString();
+  DB.saveCases(cases);
+  toast('Case marked as reviewed.');
+  renderDoctorDash();
+}
+function showDoctorCase(caseId){
+  const c=DB.getCases().find(x=>x.caseId===caseId);
+  if(!c)return;
+  const info=DISEASE_INFO[c.diagnosis]||DISEASE_INFO['Normal'];
+  const el=document.getElementById('doctor-cases');
+  el.innerHTML=`
+  <button class="btn btn-sm btn-outline" onclick="renderDoctorDash()" style="margin-bottom:14px">← Back to Cases</button>
+  <div class="card">
+    <div class="card-title">${c.patientName} — ${c.diagnosis}</div>
+    <div class="card-sub">${c.caseId} · ${new Date(c.createdAt).toLocaleString()}</div>
+    <div class="form-row">
+      ${c.frontImg?`<div style="flex:1"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Front Eye</div><img src="${c.frontImg}" style="width:100%;border-radius:8px;max-height:180px;object-fit:cover"/></div>`:''}
+      ${c.retinalImg?`<div style="flex:1"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Retinal Scan</div><img src="${c.retinalImg}" style="width:100%;border-radius:8px;max-height:180px;object-fit:cover"/></div>`:''}
+    </div>
+    <p style="margin-top:12px;font-size:13px"><strong>Symptoms:</strong> ${c.symptoms}</p>
+    <p style="font-size:13px;margin-top:4px"><strong>AI Diagnosis:</strong> ${c.diagnosis}</p>
+    <p style="font-size:13px;margin-top:4px;font-style:italic;color:var(--muted)">${info.urgency}</p>
+    <button class="btn btn-sm btn-green" onclick="markReviewed('${c.caseId}')" style="margin-top:14px">Mark as Reviewed</button>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function renderAdminDash(){
+  const doctors=DB.getAllDoctors();
+  const el=document.getElementById('admin-table');
+  if(!doctors.length){
+    el.innerHTML=`<div class="empty-state"><div class="icon">👨‍⚕️</div><p>No doctor registrations yet.</p></div>`;
+    return;
+  }
+  el.innerHTML=`
+  <div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Total registrations: <strong style="color:var(--text)">${doctors.length}</strong> · Pending: <strong style="color:var(--yellow)">${doctors.filter(d=>d.verificationStatus==='pending').length}</strong> · Approved: <strong style="color:var(--green)">${doctors.filter(d=>d.verificationStatus==='approved').length}</strong></div>
+  <table>
+    <thead><tr><th>Name</th><th>License</th><th>Hospital</th><th>Status</th><th>Certificate</th><th>Actions</th></tr></thead>
+    <tbody>
+    ${doctors.map(d=>`
+    <tr>
+      <td><strong>${d.name}</strong><br><span style="font-size:11px;color:var(--muted)">${d.email}</span></td>
+      <td style="font-size:13px">${d.licenseNo}</td>
+      <td style="font-size:12px;color:var(--muted)">${d.hospital||'—'}</td>
+      <td><span class="badge badge-${d.verificationStatus}">${d.verificationStatus}</span></td>
+      <td>
+        ${d.certDataURL
+          ?`<button class="btn btn-sm btn-outline" onclick="viewCert('${d.email}')">View License</button>`
+          :`<span style="font-size:11px;color:var(--muted)">None</span>`}
+      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${d.verificationStatus!=='approved'?`<button class="btn btn-sm btn-green" onclick="approveDoctor('${d.email}')">Approve</button>`:''}
+        ${d.verificationStatus!=='rejected'?`<button class="btn btn-sm" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px" onclick="rejectDoctor('${d.email}')">Reject</button>`:''}
+      </td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function approveDoctor(email){
+  const users=DB.getUsers();
+  if(!users.doctors[email])return;
+  users.doctors[email].verificationStatus='approved';
+  DB.saveUsers(users);
+  toast('Dr. '+users.doctors[email].name+' approved.');
+  renderAdminDash();
+}
+function rejectDoctor(email){
+  const users=DB.getUsers();
+  if(!users.doctors[email])return;
+  users.doctors[email].verificationStatus='rejected';
+  DB.saveUsers(users);
+  toast('Doctor rejected.','warn');
+  renderAdminDash();
+}
+function viewCert(email){
+  const users=DB.getUsers();
+  const d=users.doctors[email];
+  if(!d||!d.certDataURL){toast('No certificate on file.','warn');return;}
+  const w=window.open();
+  w.document.write(`<html><body style="margin:0;background:#111"><img src="${d.certDataURL}" style="max-width:100%;display:block"/></body></html>`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PDF GENERATION (jsPDF)
+// ══════════════════════════════════════════════════════════════
+function downloadPDF(){
+  const sess=DB.getSession();
+  const cases=DB.getCases();
+  const c=cases.find(x=>x.caseId===screeningData.currentCaseId);
+  if(!c){toast('Save a screening first.','warn');return;}
+  generatePDFFromCase(c,sess.user);
+}
+function downloadPDFFromCase(c){
+  const sess=DB.getSession();
+  generatePDFFromCase(c,sess.user);
+}
+function generatePDFFromCase(c,user){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const info=DISEASE_INFO[c.diagnosis]||DISEASE_INFO['Normal'];
+  const pageW=210;const margin=20;const cw=pageW-margin*2;
+
+  // Header
+  doc.setFillColor(14,17,23);
+  doc.rect(0,0,pageW,40,'F');
+  doc.setTextColor(245,158,11);
+  doc.setFontSize(24);doc.setFont('helvetica','bold');
+  doc.text('nayana',margin,26);
+  doc.setTextColor(139,143,168);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('AI Eye Screening Report',margin+38,26);
+  doc.setTextColor(255,255,255);
+  doc.text(new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}),pageW-margin,26,{align:'right'});
+
+  let y=56;
+  // Patient info box
+  doc.setFillColor(26,29,39);
+  doc.roundedRect(margin,y-6,cw,30,3,3,'F');
+  doc.setTextColor(139,143,168);doc.setFontSize(8);
+  doc.text('PATIENT',margin+6,y+2);
+  doc.setTextColor(250,250,250);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text(c.patientName||user.name,margin+6,y+10);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(139,143,168);
+  doc.text(`Age: ${c.patientAge||'—'}   Gender: ${c.patientGender||'—'}   Email: ${c.patientEmail}`,margin+6,y+18);
+  doc.text(`Case ID: ${c.caseId}   Date: ${new Date(c.createdAt).toLocaleString()}`,margin+6,y+24);
+  y+=40;
+
+  // Diagnosis
+  const riskColor=info.risk==='high'?[255,75,75]:info.risk==='moderate'?[245,158,11]:[45,158,107];
+  doc.setFillColor(...riskColor,0.15);
+  doc.setDrawColor(...riskColor);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin,y,cw,22,3,3,'S');
+  doc.setTextColor(...riskColor);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('AI DIAGNOSIS',margin+6,y+8);
+  doc.setFontSize(14);
+  doc.text(info.icon+' '+c.diagnosis,margin+6,y+17);
+  y+=30;
+
+  // Symptoms
+  doc.setTextColor(139,143,168);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('REPORTED SYMPTOMS',margin,y);y+=5;
+  doc.setTextColor(220,220,230);doc.setFont('helvetica','normal');doc.setFontSize(10);
+  const sympLines=doc.splitTextToSize(c.symptoms||'None reported',cw);
+  doc.text(sympLines,margin,y);y+=sympLines.length*5+8;
+
+  // What it means
+  doc.setTextColor(139,143,168);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('ABOUT THIS CONDITION',margin,y);y+=5;
+  doc.setTextColor(220,220,230);doc.setFont('helvetica','normal');doc.setFontSize(10);
+  const whatLines=doc.splitTextToSize(info.what,cw);
+  doc.text(whatLines,margin,y);y+=whatLines.length*5+8;
+
+  // Urgency
+  doc.setTextColor(139,143,168);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('URGENCY',margin,y);y+=5;
+  doc.setTextColor(220,220,230);doc.setFont('helvetica','normal');doc.setFontSize(10);
+  doc.text(info.urgency,margin,y);y+=10;
+
+  // Hospitals
+  doc.setTextColor(139,143,168);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('RECOMMENDED NEARBY HOSPITALS',margin,y);y+=6;
+  info.hospitals.forEach((h,i)=>{
+    doc.setFillColor(30,33,48);
+    doc.roundedRect(margin,y,cw,12,2,2,'F');
+    doc.setTextColor(220,220,230);doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.text(h.name,margin+4,y+8);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(139,143,168);
+    doc.text(h.dist,pageW-margin-4,y+8,{align:'right'});
+    y+=16;
+  });
+  y+=4;
+
+  // Disclaimer
+  doc.setFillColor(30,33,48);
+  doc.roundedRect(margin,y,cw,18,2,2,'F');
+  doc.setTextColor(139,143,168);doc.setFontSize(8);
+  doc.text('⚠️  DISCLAIMER: This report is generated by an AI screening tool and is NOT a substitute for professional medical advice.',margin+4,y+7,{maxWidth:cw-8});
+  doc.text('Please consult a licensed ophthalmologist for diagnosis and treatment.',margin+4,y+13);
+
+  // Footer
+  doc.setFillColor(14,17,23);
+  doc.rect(0,287,pageW,10,'F');
+  doc.setTextColor(75,76,83);doc.setFontSize(8);
+  doc.text('Generated by Nayana AI Eye Screening Platform',pageW/2,293,{align:'center'});
+
+  doc.save(`Nayana_Report_${c.patientName.replace(/\s+/g,'_')}_${c.caseId}.pdf`);
+  toast('PDF downloaded!');
+}
+
+// ══════════════════════════════════════════════════════════════
+// CONSENT
+// ══════════════════════════════════════════════════════════════
+function acceptConsent(){
+  document.getElementById('consent-overlay').style.display='none';
+  const app=document.getElementById('app');
+  app.style.display='flex';
+  init();
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+function init(){
+  applyTheme();
+  document.getElementById('lang-sel').value=LANG;
+  const sess=DB.getSession();
+  if(sess){
+    if(sess.role==='patient')showView('screening');
+    else if(sess.role==='doctor')showView('doctor');
+    else if(sess.role==='admin')showView('admin');
+  } else {
+    showView('auth');
+  }
+  applyLang();
+}
+
+// Guard: if user lands with an existing session, skip consent (dev reload)
+window.addEventListener('DOMContentLoaded',()=>{
+  applyTheme();
+  // Show consent every time for safety
+});
+</script>
 </body>
 </html>

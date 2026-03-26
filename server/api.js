@@ -1,666 +1,232 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const { spawn } = require('child_process');
+const cors    = require('cors');
+const multer  = require('multer');
+const path    = require('path');
+const fs      = require('fs');
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// ════════════════════════════════════════════════════════════════
-// MIDDLEWARE SETUP
-// ════════════════════════════════════════════════════════════════
+// ── Dirs ───────────────────────────────────────────────────────
+const DATA_DIR   = path.join(__dirname, '../data');
+const DOCS_DIR   = path.join(__dirname, '../doctor_docs');
+const IMGS_DIR   = path.join(__dirname, '../received_images');
+const PUBLIC_DIR = path.join(__dirname, '../frontend/public');
+
+[DATA_DIR, DOCS_DIR, IMGS_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
+
+// ── Middleware ─────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'frontend/public')));
+app.use(express.static(PUBLIC_DIR));
+app.use('/doctor_docs',      express.static(DOCS_DIR));
+app.use('/received_images',  express.static(IMGS_DIR));
 
-// ════════════════════════════════════════════════════════════════
-// DATA PERSISTENCE HELPERS
-// ════════════════════════════════════════════════════════════════
-const DATA_DIR = path.join(__dirname, 'data');
-const DOCS_DIR = path.join(__dirname, 'docs');
-
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(DOCS_DIR)) fs.mkdirSync(DOCS_DIR, { recursive: true });
-
-// JSON File helpers
-const loadJSON = (filename) => {
-  const filePath = path.join(DATA_DIR, filename);
-  if (!fs.existsSync(filePath)) return [];
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return [];
-  }
+// ── JSON helpers ───────────────────────────────────────────────
+const loadJSON = (file) => {
+  const p = path.join(DATA_DIR, file);
+  if (!fs.existsSync(p)) return [];
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return []; }
 };
+const saveJSON = (file, data) =>
+  fs.writeFileSync(path.join(DATA_DIR, file), JSON.stringify(data, null, 2));
 
-const saveJSON = (filename, data) => {
-  const filePath = path.join(DATA_DIR, filename);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-};
-
-// ════════════════════════════════════════════════════════════════
-// MULTER SETUP FOR IMAGE UPLOADS
-// ════════════════════════════════════════════════════════════════
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, 'received_images');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
+// ── Multer: certificate upload ─────────────────────────────────
+const certStorage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, DOCS_DIR),
+  filename:    (_, file, cb) =>
+    cb(null, `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`)
+});
+const certUpload = multer({
+  storage: certStorage,
+  limits:  { fileSize: 10 * 1024 * 1024 },         // 10 MB
+  fileFilter: (_, file, cb) => {
+    const ok = /pdf|jpg|jpeg|png/i.test(
+      path.extname(file.originalname).slice(1)
+    );
+    cb(ok ? null : new Error('Only PDF/JPG/PNG allowed'), ok);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-// ════════════════════════════════════════════════════════════════
-// AUTHENTICATION ENDPOINTS
-// ════════════════════════════════════════════════════════════════
+// ── Multer: eye image upload ───────────────────────────────────
+const imgStorage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, IMGS_DIR),
+  filename:    (_, file, cb) =>
+    cb(null, `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`)
+});
+const imgUpload = multer({ storage: imgStorage, limits: { fileSize: 50 * 1024 * 1024 } });
 
-// PATIENT REGISTER
+// ══════════════════════════════════════════════════════════════
+// AUTH — PATIENT
+// ══════════════════════════════════════════════════════════════
 app.post('/api/auth/patient/register', (req, res) => {
   const { name, age, gender, email, password } = req.body;
-  
-  if (!name || !email || !password) {
+  if (!name || !email || !password)
     return res.status(400).json({ success: false, error: 'Missing required fields' });
-  }
 
   const patients = loadJSON('patients.json');
-  
-  if (patients.some(p => p.email === email)) {
+  if (patients.some(p => p.email === email))
     return res.status(400).json({ success: false, error: 'Email already registered' });
-  }
 
-  const newPatient = {
-    id: `PAT-${Date.now()}`,
-    name,
-    age,
-    gender,
-    email,
-    password, // NOTE: In production, hash this!
-    createdAt: new Date().toISOString()
-  };
-
-  patients.push(newPatient);
+  patients.push({ id: `PAT-${Date.now()}`, name, age, gender, email, password, createdAt: new Date().toISOString() });
   saveJSON('patients.json', patients);
-
-  res.json({
-    success: true,
-    message: 'Patient registered successfully'
-  });
+  res.json({ success: true });
 });
 
-// PATIENT LOGIN
 app.post('/api/auth/patient/login', (req, res) => {
   const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({ success: false, error: 'Email and password required' });
-  }
-
-  const patients = loadJSON('patients.json');
-  const patient = patients.find(p => p.email === email && p.password === password);
-
-  if (!patient) {
+  const patient = loadJSON('patients.json').find(p => p.email === email && p.password === password);
+  if (!patient)
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
-  }
-
-  res.json({
-    success: true,
-    user: {
-      id: patient.id,
-      name: patient.name,
-      email: patient.email,
-      age: patient.age,
-      gender: patient.gender,
-      role: 'patient'
-    }
-  });
+  const { password: _, ...safe } = patient;
+  res.json({ success: true, user: { ...safe, role: 'patient' } });
 });
 
-// DOCTOR REGISTER
-app.post('/api/auth/doctor/register', (req, res) => {
+// ══════════════════════════════════════════════════════════════
+// AUTH — DOCTOR
+// ══════════════════════════════════════════════════════════════
+app.post('/api/auth/doctor/register', certUpload.single('certificate'), (req, res) => {
   const { name, specialization, hospital, licenseNo, email, password } = req.body;
-  
-  if (!name || !email || !password || !licenseNo) {
+  if (!name || !email || !password || !licenseNo)
     return res.status(400).json({ success: false, error: 'Missing required fields' });
-  }
 
   const doctors = loadJSON('doctors.json');
-  
-  if (doctors.some(d => d.email === email)) {
+  if (doctors.some(d => d.email === email))
     return res.status(400).json({ success: false, error: 'Email already registered' });
-  }
 
-  const newDoctor = {
-    id: `DOC-${Date.now()}`,
-    name,
-    specialization,
-    hospital,
-    licenseNo,
-    email,
-    password, // NOTE: Hash in production!
-    approved: false,
-    createdAt: new Date().toISOString(),
-    docPath: req.file ? req.file.path : null
-  };
-
-  // Handle document upload
-  if (req.file) {
-    const docFilename = `${email}_${Date.now()}_${req.file.originalname}`;
-    const docPath = path.join(DOCS_DIR, docFilename);
-    fs.copyFileSync(req.file.path, docPath);
-    newDoctor.docPath = docPath;
-  }
-
-  doctors.push(newDoctor);
-  saveJSON('doctors.json', doctors);
-
-  res.json({
-    success: true,
-    message: 'Doctor registration submitted. Awaiting admin verification.'
+  doctors.push({
+    id:                 `DOC-${Date.now()}`,
+    name, specialization, hospital, licenseNo, email, password,
+    verificationStatus: 'pending',
+    certFilename:       req.file ? req.file.filename : null,
+    createdAt:          new Date().toISOString()
   });
+  saveJSON('doctors.json', doctors);
+  res.json({ success: true, message: 'Registration submitted. Awaiting admin approval.' });
 });
 
-// DOCTOR LOGIN
 app.post('/api/auth/doctor/login', (req, res) => {
   const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({ success: false, error: 'Email and password required' });
-  }
-
-  const doctors = loadJSON('doctors.json');
-  const doctor = doctors.find(d => d.email === email && d.password === password);
-
-  if (!doctor) {
+  const doctor = loadJSON('doctors.json').find(d => d.email === email && d.password === password);
+  if (!doctor)
     return res.status(401).json({ success: false, error: 'Invalid credentials' });
-  }
 
-  if (!doctor.approved) {
-    return res.status(403).json({ success: false, error: 'Doctor account not yet approved by admin' });
-  }
+  if (doctor.verificationStatus === 'pending')
+    return res.status(403).json({ success: false, error: 'Access Denied: Pending Verification.' });
+  if (doctor.verificationStatus === 'rejected')
+    return res.status(403).json({ success: false, error: 'Your registration was rejected. Contact support.' });
 
-  res.json({
-    success: true,
-    user: {
-      id: doctor.id,
-      name: doctor.name,
-      email: doctor.email,
-      specialization: doctor.specialization,
-      hospital: doctor.hospital,
-      role: 'doctor'
-    }
-  });
+  const { password: _, ...safe } = doctor;
+  res.json({ success: true, user: { ...safe, role: 'doctor' } });
 });
 
-// ADMIN LOGIN
+// ══════════════════════════════════════════════════════════════
+// AUTH — ADMIN  (admin / admin123)
+// ══════════════════════════════════════════════════════════════
 app.post('/api/auth/admin/login', (req, res) => {
-  const { email, password } = req.body;
-  const ADMIN_EMAIL = 'admin@nayana.com';
-  const ADMIN_PASSWORD = 'admin123'; // Change in production
-
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    res.json({
-      success: true,
-      user: {
-        id: 'ADMIN-1',
-        name: 'Admin',
-        email: ADMIN_EMAIL,
-        role: 'admin'
-      }
-    });
-  } else {
-    res.status(401).json({ success: false, error: 'Invalid admin credentials' });
-  }
+  const { username, password } = req.body;
+  if (username === 'admin' && password === 'admin123')
+    return res.json({ success: true, user: { id: 'ADMIN-1', name: 'Admin', role: 'admin' } });
+  res.status(401).json({ success: false, error: 'Invalid admin credentials' });
 });
 
-// ════════════════════════════════════════════════════════════════
-// IMAGE UPLOAD & INFERENCE
-// ════════════════════════════════════════════════════════════════
-
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, error: 'No image provided' });
-  }
-
-  console.log('✅ Image uploaded:', req.file.filename);
-  
-  res.json({
-    success: true,
-    message: 'Image received',
-    imagePath: `/received_images/${req.file.filename}`,
-    filename: req.file.filename
-  });
+// ══════════════════════════════════════════════════════════════
+// ADMIN — DOCTOR MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+app.get('/api/admin/doctors', (_, res) => {
+  res.json({ success: true, doctors: loadJSON('doctors.json') });
 });
 
-app.post('/api/inference', (req, res) => {
-  const { imagePath } = req.body;
-  
-  if (!imagePath) {
-    return res.status(400).json({ success: false, error: 'Image path required' });
-  }
-
-  const fullPath = path.join(__dirname, imagePath);
-  
-  if (!fs.existsSync(fullPath)) {
-    return res.status(400).json({ success: false, error: 'Image not found' });
-  }
-
-  console.log('🔍 Running inference on:', fullPath);
-
-  const pythonProcess = spawn('python', [
-    path.join(__dirname, 'server/python/inference_bridge.py'),
-    fullPath
-  ]);
-
-  let outputData = '';
-  let errorData = '';
-
-  pythonProcess.stdout.on('data', (data) => {
-    outputData += data.toString();
-  });
-
-  pythonProcess.stderr.on('data', (data) => {
-    errorData += data.toString();
-  });
-
-  pythonProcess.on('close', (code) => {
-    if (code !== 0) {
-      console.error('❌ Python error:', errorData);
-      return res.status(500).json({
-        success: false,
-        error: 'Inference failed',
-        details: errorData
-      });
-    }
-
-    try {
-      const result = JSON.parse(outputData);
-      res.json({
-        success: true,
-        data: result
-      });
-    } catch (err) {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to parse results',
-        details: err.message
-      });
-    }
-  });
+app.post('/api/admin/doctors/:email/approve', (req, res) => {
+  const doctors = loadJSON('doctors.json');
+  const idx = doctors.findIndex(d => d.email === req.params.email);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'Doctor not found' });
+  doctors[idx].verificationStatus = 'approved';
+  saveJSON('doctors.json', doctors);
+  res.json({ success: true });
 });
 
-// ════════════════════════════════════════════════════════════════
-// PATIENT ENDPOINTS
-// ════════════════════════════════════════════════════════════════
+app.post('/api/admin/doctors/:email/reject', (req, res) => {
+  const doctors = loadJSON('doctors.json');
+  const idx = doctors.findIndex(d => d.email === req.params.email);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'Doctor not found' });
+  doctors[idx].verificationStatus = 'rejected';
+  saveJSON('doctors.json', doctors);
+  res.json({ success: true });
+});
 
-// Submit screening case
-app.post('/api/patient/screening/submit', (req, res) => {
-  const {
-    patientEmail,
-    patientName,
-    patientAge,
-    patientGender,
-    symptoms,
-    qualityScore,
-    probs,
-    detectedConditions,
-    riskLevel,
-    imagePath,
-    heatmapPath
-  } = req.body;
+// View uploaded certificate
+app.get('/api/admin/doctors/:email/certificate', (req, res) => {
+  const doctors = loadJSON('doctors.json');
+  const doctor  = doctors.find(d => d.email === req.params.email);
+  if (!doctor || !doctor.certFilename)
+    return res.status(404).json({ success: false, error: 'No certificate on file' });
+  res.sendFile(path.join(DOCS_DIR, doctor.certFilename));
+});
 
-  const cases = loadJSON('cases.json');
-  
+// ══════════════════════════════════════════════════════════════
+// SHARED — APPROVED DOCTORS LIST (for patient send-report)
+// ══════════════════════════════════════════════════════════════
+app.get('/api/doctors', (_, res) => {
+  const approved = loadJSON('doctors.json')
+    .filter(d => d.verificationStatus === 'approved')
+    .map(({ password: _, ...d }) => d);
+  res.json({ success: true, doctors: approved });
+});
+
+// ══════════════════════════════════════════════════════════════
+// IMAGE UPLOAD
+// ══════════════════════════════════════════════════════════════
+app.post('/api/upload/eye', imgUpload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ success: false, error: 'No image provided' });
+  res.json({ success: true, filename: req.file.filename, url: `/received_images/${req.file.filename}` });
+});
+
+// ══════════════════════════════════════════════════════════════
+// CASES
+// ══════════════════════════════════════════════════════════════
+app.post('/api/cases', (req, res) => {
+  const cases   = loadJSON('cases.json');
   const newCase = {
-    caseId: `CASE-${Date.now()}`,
-    patientEmail,
-    patientName,
-    patientAge,
-    patientGender,
-    symptoms,
-    qualityScore,
-    probs: probs || [],
-    detectedConditions: detectedConditions || [],
-    riskLevel,
-    imagePath,
-    heatmapPath,
-    status: 'Pending',
-    doctorDiagnosis: null,
-    doctorPrescription: null,
-    doctorReferral: null,
-    doctorNotes: null,
-    reviewedAt: null,
-    createdAt: new Date().toISOString()
+    caseId:     `CASE-${Date.now()}`,
+    status:     'Pending',
+    createdAt:  new Date().toISOString(),
+    ...req.body
   };
-
   cases.push(newCase);
   saveJSON('cases.json', cases);
-
-  res.json({
-    success: true,
-    caseId: newCase.caseId,
-    message: 'Case submitted successfully'
-  });
+  res.json({ success: true, caseId: newCase.caseId });
 });
 
-// Get patient's cases
-app.get('/api/patient/cases/:email', (req, res) => {
-  const { email } = req.params;
+app.get('/api/cases/patient/:email', (req, res) => {
+  const cases = loadJSON('cases.json').filter(c => c.patientEmail === req.params.email);
+  res.json({ success: true, cases });
+});
+
+app.get('/api/cases/doctor/:email', (req, res) => {
+  const cases = loadJSON('cases.json').filter(c => c.sentToDoctor === req.params.email);
+  res.json({ success: true, cases });
+});
+
+app.put('/api/cases/:caseId/review', (req, res) => {
   const cases = loadJSON('cases.json');
-  
-  const patientCases = cases.filter(c => c.patientEmail === email);
-  
-  res.json({
-    success: true,
-    cases: patientCases
-  });
-});
-
-// Get patient's appointments
-app.get('/api/patient/appointments/:email', (req, res) => {
-  const { email } = req.params;
-  const appointments = loadJSON('appointments.json');
-  
-  const patientAppointments = appointments.filter(a => a.patientEmail === email);
-  
-  res.json({
-    success: true,
-    appointments: patientAppointments
-  });
-});
-
-// Book appointment
-app.post('/api/patient/appointments', (req, res) => {
-  const {
-    patientEmail,
-    patientName,
-    doctorEmail,
-    doctorName,
-    date,
-    timeSlot,
-    caseId,
-    notes
-  } = req.body;
-
-  const appointments = loadJSON('appointments.json');
-  
-  // Check if slot is already booked
-  const isBooked = appointments.some(
-    a => a.doctorEmail === doctorEmail && 
-         a.date === date && 
-         a.timeSlot === timeSlot &&
-         ['Pending', 'Confirmed'].includes(a.status)
-  );
-
-  if (isBooked) {
-    return res.status(400).json({
-      success: false,
-      error: `Slot ${timeSlot} on ${date} is already booked`
-    });
-  }
-
-  const appointmentId = `APPT-${appointments.length + 1}`;
-  const newAppointment = {
-    appointmentId,
-    patientEmail,
-    patientName,
-    doctorEmail,
-    doctorName,
-    date,
-    timeSlot,
-    caseId,
-    notes,
-    status: 'Pending',
-    meetLink: null,
-    createdAt: new Date().toISOString()
-  };
-
-  appointments.push(newAppointment);
-  saveJSON('appointments.json', appointments);
-
-  res.json({
-    success: true,
-    appointmentId: appointmentId,
-    message: 'Appointment booked successfully'
-  });
-});
-
-// Get messages for a case
-app.get('/api/messages/:caseId', (req, res) => {
-  const { caseId } = req.params;
-  const messages = loadJSON('messages.json');
-  
-  const caseMessages = messages.find(m => m.caseId === caseId);
-  
-  res.json({
-    success: true,
-    messages: caseMessages ? caseMessages.messages : []
-  });
-});
-
-// Send message
-app.post('/api/messages/:caseId', (req, res) => {
-  const { caseId } = req.params;
-  const { senderName, senderRole, text } = req.body;
-
-  const messages = loadJSON('messages.json');
-  
-  let caseMessages = messages.find(m => m.caseId === caseId);
-  
-  if (!caseMessages) {
-    caseMessages = {
-      caseId,
-      messages: []
-    };
-    messages.push(caseMessages);
-  }
-
-  caseMessages.messages.push({
-    senderName,
-    senderRole,
-    text,
-    timestamp: new Date().toISOString()
-  });
-
-  saveJSON('messages.json', messages);
-
-  res.json({
-    success: true,
-    message: 'Message sent successfully'
-  });
-});
-
-// ════════════════════════════════════════════════════════════════
-// DOCTOR ENDPOINTS
-// ════════════════════════════════════════════════════════════════
-
-// Get doctor's cases
-app.get('/api/doctor/cases/:email', (req, res) => {
-  const { email } = req.params;
-  const appointments = loadJSON('appointments.json');
-  const cases = loadJSON('cases.json');
-  
-  const doctorAppointmentCaseIds = appointments
-    .filter(a => a.doctorEmail === email)
-    .map(a => a.caseId);
-
-  const doctorCases = cases.filter(c => doctorAppointmentCaseIds.includes(c.caseId));
-  
-  res.json({
-    success: true,
-    cases: doctorCases
-  });
-});
-
-// Submit diagnosis for a case
-app.post('/api/doctor/cases/:caseId/diagnosis', (req, res) => {
-  const { caseId } = req.params;
-  const { diagnosis, prescription, referral, notes } = req.body;
-
-  const cases = loadJSON('cases.json');
-  const caseIndex = cases.findIndex(c => c.caseId === caseId);
-
-  if (caseIndex === -1) {
-    return res.status(404).json({ success: false, error: 'Case not found' });
-  }
-
-  cases[caseIndex].doctorDiagnosis = diagnosis;
-  cases[caseIndex].doctorPrescription = prescription;
-  cases[caseIndex].doctorReferral = referral;
-  cases[caseIndex].doctorNotes = notes;
-  cases[caseIndex].status = 'Reviewed';
-  cases[caseIndex].reviewedAt = new Date().toISOString();
-
+  const idx   = cases.findIndex(c => c.caseId === req.params.caseId);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'Case not found' });
+  Object.assign(cases[idx], { ...req.body, status: 'Reviewed', reviewedAt: new Date().toISOString() });
   saveJSON('cases.json', cases);
-
-  res.json({
-    success: true,
-    message: 'Diagnosis submitted successfully'
-  });
+  res.json({ success: true });
 });
 
-// Get doctor's appointments
-app.get('/api/doctor/appointments/:email', (req, res) => {
-  const { email } = req.params;
-  const appointments = loadJSON('appointments.json');
-  
-  const doctorAppointments = appointments.filter(a => a.doctorEmail === email);
-  
-  res.json({
-    success: true,
-    appointments: doctorAppointments
-  });
-});
-
-// Update appointment status
-app.put('/api/doctor/appointments/:appointmentId/status', (req, res) => {
-  const { appointmentId } = req.params;
-  const { status } = req.body;
-
-  const appointments = loadJSON('appointments.json');
-  const appointmentIndex = appointments.findIndex(a => a.appointmentId === appointmentId);
-
-  if (appointmentIndex === -1) {
-    return res.status(404).json({ success: false, error: 'Appointment not found' });
-  }
-
-  appointments[appointmentIndex].status = status;
-  
-  // Generate Jitsi link if confirmed
-  if (status === 'Confirmed' && !appointments[appointmentIndex].meetLink) {
-    const apptId = appointmentId.toLowerCase().replace(/-/g, '');
-    appointments[appointmentIndex].meetLink = `https://meet.jit.si/nayana-${apptId}`;
-  }
-
-  saveJSON('appointments.json', appointments);
-
-  res.json({
-    success: true,
-    message: 'Appointment status updated'
-  });
-});
-
-// ════════════════════════════════════════════════════════════════
-// ADMIN ENDPOINTS
-// ════════════════════════════════════════════════════════════════
-
-// Get pending doctors
-app.get('/api/admin/pending-doctors', (req, res) => {
-  const doctors = loadJSON('doctors.json');
-  const pendingDoctors = doctors.filter(d => !d.approved);
-  
-  res.json({
-    success: true,
-    doctors: pendingDoctors
-  });
-});
-
-// Approve doctor
-app.post('/api/admin/doctors/:email/approve', (req, res) => {
-  const { email } = req.params;
-  const doctors = loadJSON('doctors.json');
-  
-  const doctorIndex = doctors.findIndex(d => d.email === email);
-  
-  if (doctorIndex === -1) {
-    return res.status(404).json({ success: false, error: 'Doctor not found' });
-  }
-
-  doctors[doctorIndex].approved = true;
-  saveJSON('doctors.json', doctors);
-
-  res.json({
-    success: true,
-    message: `Dr. ${doctors[doctorIndex].name} approved successfully`
-  });
-});
-
-// Reject doctor
-app.post('/api/admin/doctors/:email/reject', (req, res) => {
-  const { email } = req.params;
-  const doctors = loadJSON('doctors.json');
-  
-  const doctorIndex = doctors.findIndex(d => d.email === email);
-  
-  if (doctorIndex === -1) {
-    return res.status(404).json({ success: false, error: 'Doctor not found' });
-  }
-
-  doctors.splice(doctorIndex, 1);
-  saveJSON('doctors.json', doctors);
-
-  res.json({
-    success: true,
-    message: 'Doctor application rejected'
-  });
-});
-
-// ════════════════════════════════════════════════════════════════
-// SHARED ENDPOINTS
-// ════════════════════════════════════════════════════════════════
-
-// Get all approved doctors (for patient to book appointments)
-app.get('/api/doctors', (req, res) => {
-  const doctors = loadJSON('doctors.json');
-  const approvedDoctors = doctors.filter(d => d.approved);
-  
-  res.json({
-    success: true,
-    doctors: approvedDoctors
-  });
-});
-
-// ════════════════════════════════════════════════════════════════
-// STATIC FILE SERVING & FALLBACK
-// ════════════════════════════════════════════════════════════════
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/public/index.html'));
-});
-
-// Catch-all for React Router
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/public/index.html'));
-});
-
-// ════════════════════════════════════════════════════════════════
-// START SERVER
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// CATCH-ALL → serve index.html
+// ══════════════════════════════════════════════════════════════
+app.get('*', (_, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 
 app.listen(PORT, () => {
-  console.log(`\n✅ Nayana API running on http://localhost:${PORT}\n`);
-  console.log('📍 Auth endpoints: /api/auth/*');
-  console.log('📍 Patient endpoints: /api/patient/*');
-  console.log('📍 Doctor endpoints: /api/doctor/*');
-  console.log('📍 Admin endpoints: /api/admin/*');
-  console.log('📍 Messaging: /api/messages/*\n');
+  console.log(`\n✅  Nayana API  →  http://localhost:${PORT}\n`);
+  console.log('Routes:  /api/auth/*  /api/admin/*  /api/doctors  /api/cases/*  /api/upload/*\n');
 });
 
 module.exports = app;
